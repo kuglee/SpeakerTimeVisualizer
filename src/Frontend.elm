@@ -90,7 +90,46 @@ updateFromBackend msg model =
 
 view : Model -> Element FrontendMsg
 view model =
-    column [ width fill, spacing 20 ]
+    column
+        [ spacing 20
+        , width fill
+        , height fill
+        , below
+            (column [ width fill, spacing 20, paddingXY 20 20 ]
+                [ row [ spacing 20 ]
+                    [ row [ spacing 10 ]
+                        [ Input.button
+                            buttonStyle
+                            { onPress = Just Decrement
+                            , label = text "<"
+                            }
+                        , text (String.fromInt model.counter ++ "%")
+                        , Input.button
+                            buttonStyle
+                            { onPress = Just Increment
+                            , label = text ">"
+                            }
+                        ]
+                    , Input.text [ width (px 80) ]
+                        { text = String.fromInt model.incrementAmount
+                        , onChange = IncrementAmountChange
+                        , placeholder = Nothing
+                        , label = Input.labelLeft [] (text "Nagyság:")
+                        }
+                    ]
+                , el []
+                    (Input.checkbox []
+                        { onChange = IsCenterLineVisibleChange
+                        , icon = Input.defaultCheckbox
+                        , checked = model.isCenterLineVisible
+                        , label =
+                            Input.labelRight []
+                                (text "Középvonal megjelenítése")
+                        }
+                    )
+                ]
+            )
+        ]
         [ Element.html
             (Html.node "style"
                 []
@@ -99,9 +138,10 @@ view model =
             )
         , row
             [ width fill
+            , height fill
             , if model.isCenterLineVisible then
                 inFront
-                    (row [ width fill ]
+                    (row [ width fill, height fill ]
                         [ el
                             [ width (fillPortion (50 - (model.incrementAmount // 2)))
                             ]
@@ -109,7 +149,7 @@ view model =
                         , el
                             [ width (fillPortion model.incrementAmount)
                             , Background.color (rgb255 0x00 0x00 0x00)
-                            , height (px 2000)
+                            , height fill
                             ]
                             Element.none
                         , el
@@ -125,48 +165,15 @@ view model =
             [ el
                 [ Background.color (rgb255 0xFF 0x00 0x00)
                 , width (fillPortion model.counter)
-                , height (px 2000)
+                , height fill
                 ]
                 Element.none
             , el
                 [ Background.color (rgb255 0x00 0x00 0xFF)
                 , width (fillPortion (100 - model.counter))
-                , height (px 2000)
+                , height fill
                 ]
                 Element.none
-            ]
-        , column [ width fill, spacing 20, paddingXY 20 20 ]
-            [ row [ spacing 20 ]
-                [ row [ spacing 10 ]
-                    [ Input.button
-                        buttonStyle
-                        { onPress = Just Decrement
-                        , label = text "<"
-                        }
-                    , text (String.fromInt model.counter ++ "%")
-                    , Input.button
-                        buttonStyle
-                        { onPress = Just Increment
-                        , label = text ">"
-                        }
-                    ]
-                , Input.text [ width (px 80) ]
-                    { text = String.fromInt model.incrementAmount
-                    , onChange = IncrementAmountChange
-                    , placeholder = Nothing
-                    , label = Input.labelLeft [] (text "Nagyság:")
-                    }
-                ]
-            , el []
-                (Input.checkbox []
-                    { onChange = IsCenterLineVisibleChange
-                    , icon = Input.defaultCheckbox
-                    , checked = model.isCenterLineVisible
-                    , label =
-                        Input.labelRight []
-                            (text "Középvonal megjelenítése")
-                    }
-                )
             ]
         ]
 
