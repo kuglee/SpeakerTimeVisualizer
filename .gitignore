@@ -1,0 +1,6 @@
+elm-stuff
+.DS_Store
+
+# IntelliJ stuff:
+.idea/*
+*.iml
