@@ -1,8 +1,10 @@
 module Frontend exposing (Model, app)
 
-import Html exposing (Html, label, text)
-import Html.Attributes exposing (checked, placeholder, style, type_, value)
-import Html.Events exposing (onCheck, onClick, onInput)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Input as Input
+import Html
+import Html.Attributes
 import Lamdera exposing (sendToBackend)
 import Types exposing (..)
 
@@ -19,7 +21,10 @@ app =
         , view =
             \model ->
                 { title = "v1"
-                , body = [ view model ]
+                , body =
+                    [ Element.layout []
+                        (view model)
+                    ]
                 }
         , subscriptions = \_ -> Sub.none
         , onUrlChange = \_ -> FNoop
@@ -83,92 +88,93 @@ updateFromBackend msg model =
             ( { model | isCenterLineVisible = newValue, clientId = clientId }, Cmd.none )
 
 
-view : Model -> Html FrontendMsg
+view : Model -> Element FrontendMsg
 view model =
-    Html.div
-        []
-        [ Html.node "style"
-            []
-            [ Html.text overscrollDisabledStyle
-            ]
-        , Html.div
-            [ style "display" "flex"
-            , style "height" "200vh"
-            ]
-            [ Html.div
-                [ style "background" "red"
-                , style "width" (String.fromInt model.counter ++ "%")
-                ]
+    column [ width fill, spacing 20 ]
+        [ Element.html
+            (Html.node "style"
                 []
-            , Html.div
-                [ style "background" "blue"
-                , style "width" (String.fromInt (100 - model.counter) ++ "%")
+                [ Html.text overscrollDisabledStyle
                 ]
-                []
+            )
+        , row
+            [ width fill
             , if model.isCenterLineVisible then
-                Html.div
-                    [ style "position" "absolute"
-                    , style "width" "50%"
-                    , style "height" "200vh"
-                    , style "border-right" ("solid " ++ String.fromInt model.incrementAmount ++ "vw")
-                    , style "right" ("calc(50% - 0.5*" ++ String.fromInt model.incrementAmount ++ "vw)")
-                    ]
-                    [ text "" ]
+                inFront
+                    (row [ width fill ]
+                        [ el
+                            [ width (fillPortion (50 - (model.incrementAmount // 2)))
+                            ]
+                            Element.none
+                        , el
+                            [ width (fillPortion model.incrementAmount)
+                            , Background.color (rgb255 0x00 0x00 0x00)
+                            , height (px 2000)
+                            ]
+                            Element.none
+                        , el
+                            [ width (fillPortion (50 - (model.incrementAmount // 2)))
+                            ]
+                            Element.none
+                        ]
+                    )
 
               else
-                Html.div [] []
+                htmlAttribute (Html.Attributes.class "")
             ]
-        , Html.div
-            [ style "padding" "30px"
-            , style "position" "absolute"
-            , style "display" "grid"
+            [ el
+                [ Background.color (rgb255 0xFF 0x00 0x00)
+                , width (fillPortion model.counter)
+                , height (px 2000)
+                ]
+                Element.none
+            , el
+                [ Background.color (rgb255 0x00 0x00 0xFF)
+                , width (fillPortion (100 - model.counter))
+                , height (px 2000)
+                ]
+                Element.none
             ]
-            [ Html.div
-                [ style "font-size" "34px"
-                , style "display" "flex"
-                , style "align-items" "center"
-                , style "gap" "10px"
-                ]
-                [ Html.button (onClick Decrement :: buttonStyle) [ text "<" ]
-                , Html.text (String.fromInt model.counter ++ "%")
-                , Html.button (onClick Increment :: buttonStyle) [ text ">" ]
-                , Html.input
-                    ([ type_ "number"
-                     , placeholder ""
-                     , value (String.fromInt model.incrementAmount)
-                     , onInput IncrementAmountChange
-                     ]
-                        ++ inputStyle
-                    )
-                    []
-                ]
-            , label
-                [ style "font-size" "initial"
-                ]
-                [ Html.input
-                    [ type_ "checkbox"
-                    , checked model.isCenterLineVisible
-                    , onCheck IsCenterLineVisibleChange
+        , column [ width fill, spacing 20, paddingXY 20 20 ]
+            [ row [ spacing 20 ]
+                [ row [ spacing 10 ]
+                    [ Input.button
+                        buttonStyle
+                        { onPress = Just Decrement
+                        , label = text "<"
+                        }
+                    , text (String.fromInt model.counter ++ "%")
+                    , Input.button
+                        buttonStyle
+                        { onPress = Just Increment
+                        , label = text ">"
+                        }
                     ]
-                    []
-                , text "Középvonal megjelenítése"
+                , Input.text [ width (px 80) ]
+                    { text = String.fromInt model.incrementAmount
+                    , onChange = IncrementAmountChange
+                    , placeholder = Nothing
+                    , label = Input.labelLeft [] (text "Nagyság:")
+                    }
                 ]
+            , el []
+                (Input.checkbox []
+                    { onChange = IsCenterLineVisibleChange
+                    , icon = Input.defaultCheckbox
+                    , checked = model.isCenterLineVisible
+                    , label =
+                        Input.labelRight []
+                            (text "Középvonal megjelenítése")
+                    }
+                )
             ]
         ]
 
 
-buttonStyle : List (Html.Attribute msg)
 buttonStyle =
-    [ style "width" "50px"
-    , style "height" "50px"
-    ]
-
-
-inputStyle : List (Html.Attribute msg)
-inputStyle =
-    [ style "width" "80px"
-    , style "margin" "20px"
-    , style "font-size" "inherit"
+    [ Background.color (rgb255 0x90 0x90 0x90)
+    , height (px 50)
+    , width (px 50)
     ]
 
 
