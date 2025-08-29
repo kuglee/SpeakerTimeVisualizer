@@ -31,7 +31,13 @@ update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )
 update msg model =
     case msg of
         ClientConnected sessionId clientId ->
-            ( model, sendToFrontend clientId <| CounterNewValue model.counter clientId )
+            ( model
+            , Cmd.batch
+                [ sendToFrontend clientId <| CounterNewValue model.counter clientId
+                , sendToFrontend clientId <| IncrementAmountNewValue model.incrementAmount clientId
+                , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
+                ]
+            )
 
         Noop ->
             ( model, Cmd.none )
