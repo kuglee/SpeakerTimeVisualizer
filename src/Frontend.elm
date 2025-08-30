@@ -37,6 +37,22 @@ app =
         }
 
 
+fankadeliSideData : SideData
+fankadeliSideData =
+    { name = "FankaDeli"
+    , imageSrc = "/fankadeli.jpg"
+    , color = rgb255 0xFF 0x00 0x00
+    }
+
+
+famSideData : SideData
+famSideData =
+    { name = "FAM"
+    , imageSrc = "/fam.jpg"
+    , color = rgb255 0x00 0x00 0xFF
+    }
+
+
 init : Url -> Browser.Navigation.Key -> ( FrontendModel, Cmd FrontendMsg )
 init url key =
     ( { key = key
@@ -45,6 +61,7 @@ init url key =
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
+      , fankadeliSide = Left
       , clientId = ""
       }
     , Cmd.none
@@ -85,6 +102,18 @@ update msg model =
         AvatarScaleChange newValue ->
             ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
 
+        FankaDeliSideChange newValue ->
+            let
+                newCounter =
+                    100 - model.counter
+            in
+            ( { model
+                | fankadeliSide = newValue
+                , counter = newCounter
+              }
+            , sendToBackend (FankaDeliSideChanged newValue newCounter)
+            )
+
         FNoop ->
             ( model, Cmd.none )
 
@@ -104,6 +133,15 @@ updateFromBackend msg model =
         AvatarScaleNewValue newValue clientId ->
             ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
 
+        FankadeliSideNewValue newSideValue newCounterValue clientId ->
+            ( { model
+                | fankadeliSide = newSideValue
+                , counter = newCounterValue
+                , clientId = clientId
+              }
+            , Cmd.none
+            )
+
 
 view : FrontendModel -> Element FrontendMsg
 view model =
@@ -117,6 +155,20 @@ view model =
 
 homeView : Model -> Element FrontendMsg
 homeView model =
+    let
+        getSideData side =
+            if side == model.fankadeliSide then
+                fankadeliSideData
+
+            else
+                famSideData
+
+        leftSideData =
+            getSideData Left
+
+        rightSideData =
+            getSideData Right
+    in
     column
         [ spacing 20
         , width fill
@@ -137,13 +189,13 @@ homeView model =
                     , spaceEvenly
                     ]
                     [ avatarView
-                        { name = "FankaDeli"
-                        , imageSrc = "/fankadeli.jpg"
+                        { sideData =
+                            leftSideData
                         , scale = model.avatarScale
                         }
                     , avatarView
-                        { name = "FAM"
-                        , imageSrc = "/fam.jpg"
+                        { sideData =
+                            rightSideData
                         , scale = model.avatarScale
                         }
                     ]
@@ -172,13 +224,13 @@ homeView model =
                 htmlAttribute (Html.Attributes.class "")
             ]
             [ el
-                [ Background.color (rgb255 0xFF 0x00 0x00)
+                [ Background.color leftSideData.color
                 , width (fillPortion model.counter)
                 , height fill
                 ]
                 Element.none
             , el
-                [ Background.color (rgb255 0x00 0x00 0xFF)
+                [ Background.color rightSideData.color
                 , width (fillPortion (100 - model.counter))
                 , height fill
                 ]
@@ -245,6 +297,18 @@ adminView model =
             , thumb =
                 Input.defaultThumb
             }
+        , Input.radio
+            [ padding 10
+            , spacing 20
+            ]
+            { onChange = FankaDeliSideChange
+            , selected = Just model.fankadeliSide
+            , label = Input.labelAbove [] (text "FankaDeli oldal")
+            , options =
+                [ Input.option Left (text "Bal")
+                , Input.option Right (text "Jobb")
+                ]
+            }
         ]
 
 
@@ -265,8 +329,8 @@ body {
 """
 
 
-avatarView : { name : String, imageSrc : String, scale : Int } -> Element msg
-avatarView { name, imageSrc, scale } =
+avatarView : { sideData : SideData, scale : Int } -> Element msg
+avatarView { sideData, scale } =
     column
         [ height fill
         , spacing (round (4 * toFloat scale ^ 0.4))
@@ -278,7 +342,7 @@ avatarView { name, imageSrc, scale } =
             , clip
             , centerX
             ]
-            { src = imageSrc
+            { src = sideData.imageSrc
             , description = ""
             }
         , el
@@ -287,5 +351,5 @@ avatarView { name, imageSrc, scale } =
             , centerX
             ]
           <|
-            text name
+            text sideData.name
         ]

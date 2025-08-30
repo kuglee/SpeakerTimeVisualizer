@@ -23,6 +23,7 @@ init =
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
+      , fankadeliSide = Left
       }
     , Cmd.none
     )
@@ -38,6 +39,7 @@ update msg model =
                 , sendToFrontend clientId <| IncrementAmountNewValue model.incrementAmount clientId
                 , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
                 , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
+                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.counter clientId
                 ]
             )
 
@@ -59,6 +61,14 @@ updateFromFrontend sessionId clientId msg model =
 
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
+
+        FankaDeliSideChanged side counter ->
+            ( { model
+                | fankadeliSide = side
+                , counter = counter
+              }
+            , broadcast (FankadeliSideNewValue side counter clientId)
+            )
 
 
 subscriptions model =

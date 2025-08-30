@@ -1,6 +1,7 @@
 module Types exposing (..)
 
 import Browser.Navigation
+import Element exposing (Color)
 import Lamdera exposing (ClientId, SessionId)
 import Route exposing (Route)
 import Url exposing (Url)
@@ -11,6 +12,7 @@ type alias BackendModel =
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
+    , fankadeliSide : Side
     }
 
 
@@ -21,6 +23,7 @@ type alias FrontendModel =
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
+    , fankadeliSide : Side
     , clientId : String
     }
 
@@ -32,6 +35,7 @@ type FrontendMsg
     | IncrementAmountChange String
     | IsCenterLineVisibleChange Bool
     | AvatarScaleChange Int
+    | FankaDeliSideChange Side
     | FNoop
 
 
@@ -40,6 +44,7 @@ type ToBackend
     | IncrementAmountChanged Int
     | IsCenterLineVisibleChanged Bool
     | AvatarScaleChanged Int
+    | FankaDeliSideChanged Side Int
 
 
 type BackendMsg
@@ -52,3 +57,16 @@ type ToFrontend
     | IncrementAmountNewValue Int String
     | IsCenterLineVisibleNewValue Bool String
     | AvatarScaleNewValue Int String
+    | FankadeliSideNewValue Side Int String
+
+
+type alias SideData =
+    { name : String
+    , imageSrc : String
+    , color : Color
+    }
+
+
+type Side
+    = Left
+    | Right
