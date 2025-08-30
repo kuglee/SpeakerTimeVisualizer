@@ -132,42 +132,20 @@ homeView model =
             [ width fill
             , height fill
             , inFront
-                (column
+                (row
                     [ width fill
-                    , height fill
+                    , spaceEvenly
                     ]
-                    [ el
-                        [ height (fillPortion 2)
-                        ]
-                        Element.none
-                    , row
-                        [ width fill
-                        , height (fillPortion 98)
-                        ]
-                        [ el
-                            [ width (fillPortion 1)
-                            ]
-                            Element.none
-                        , avatarView
-                            { name = "FankaDeli"
-                            , imageSrc = "/fankadeli.jpg"
-                            , scale = model.avatarScale
-                            }
-                        , el
-                            [ width (fillPortion 48)
-                            , height fill
-                            ]
-                            Element.none
-                        , avatarView
-                            { name = "FAM"
-                            , imageSrc = "/fam.jpg"
-                            , scale = model.avatarScale
-                            }
-                        , el
-                            [ width (fillPortion 1)
-                            ]
-                            Element.none
-                        ]
+                    [ avatarView
+                        { name = "FankaDeli"
+                        , imageSrc = "/fankadeli.jpg"
+                        , scale = model.avatarScale
+                        }
+                    , avatarView
+                        { name = "FAM"
+                        , imageSrc = "/fam.jpg"
+                        , scale = model.avatarScale
+                        }
                     ]
                 )
             , if model.isCenterLineVisible then
@@ -290,20 +268,21 @@ body {
 avatarView : { name : String, imageSrc : String, scale : Int } -> Element msg
 avatarView { name, imageSrc, scale } =
     column
-        [ width (fillPortion scale)
-        , height fill
-        , spacing (round (5 * toFloat scale ^ 0.4))
+        [ height fill
+        , spacing (round (4 * toFloat scale ^ 0.4))
+        , padding (round (5 * toFloat scale ^ 0.4))
         ]
         [ image
-            [ width fill
+            [ width (px (scale * 10))
             , Border.rounded 10000
             , clip
+            , centerX
             ]
             { src = imageSrc
             , description = ""
             }
         , el
-            [ Font.size (round (12 * toFloat scale ^ 0.5))
+            [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
             , centerX
             ]
