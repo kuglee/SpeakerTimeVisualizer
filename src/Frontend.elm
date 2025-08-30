@@ -198,11 +198,13 @@ homeView model =
                     [ avatarView
                         { sideData =
                             leftSideData
+                        , side = Left
                         , scale = model.avatarScale
                         }
                     , avatarView
                         { sideData =
                             rightSideData
+                        , side = Right
                         , scale = model.avatarScale
                         }
                     ]
@@ -364,8 +366,17 @@ body {
 """
 
 
-avatarView : { sideData : SideData, scale : Int } -> Element msg
-avatarView { sideData, scale } =
+avatarView : { sideData : SideData, side : Side, scale : Int } -> Element msg
+avatarView { sideData, side, scale } =
+    let
+        alignment =
+            case side of
+                Left ->
+                    alignLeft
+
+                Right ->
+                    alignRight
+    in
     column
         [ height fill
         , spacing (round (4 * toFloat scale ^ 0.4))
@@ -375,7 +386,7 @@ avatarView { sideData, scale } =
             [ width (px (scale * 10))
             , Border.rounded 10000
             , clip
-            , centerX
+            , alignment
             ]
             { src = sideData.imageSrc
             , description = ""
@@ -383,8 +394,7 @@ avatarView { sideData, scale } =
         , el
             [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
-            , centerX
-            , Font.color (rgb255 0xFF 0xFF 0xFF)
+            , alignment
             ]
           <|
             text sideData.name
