@@ -361,6 +361,7 @@ avatarView { sideData, scale } =
             [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
             , centerX
+            , Font.color (rgb255 0xFF 0xFF 0xFF)
             ]
           <|
             text sideData.name
