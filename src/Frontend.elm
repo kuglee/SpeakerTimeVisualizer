@@ -3,6 +3,8 @@ module Frontend exposing (Model, app)
 import Browser.Navigation
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import Html
 import Html.Attributes
@@ -42,6 +44,7 @@ init url key =
       , counter = 50
       , incrementAmount = 1
       , isCenterLineVisible = False
+      , avatarScale = 15
       , clientId = ""
       }
     , Cmd.none
@@ -79,6 +82,9 @@ update msg model =
         IsCenterLineVisibleChange newValue ->
             ( { model | isCenterLineVisible = newValue }, sendToBackend (IsCenterLineVisibleChanged newValue) )
 
+        AvatarScaleChange newValue ->
+            ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
+
         FNoop ->
             ( model, Cmd.none )
 
@@ -94,6 +100,9 @@ updateFromBackend msg model =
 
         IsCenterLineVisibleNewValue newValue clientId ->
             ( { model | isCenterLineVisible = newValue, clientId = clientId }, Cmd.none )
+
+        AvatarScaleNewValue newValue clientId ->
+            ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
 
 
 view : FrontendModel -> Element FrontendMsg
@@ -122,6 +131,45 @@ homeView model =
         , row
             [ width fill
             , height fill
+            , inFront
+                (column
+                    [ width fill
+                    , height fill
+                    ]
+                    [ el
+                        [ height (fillPortion 2)
+                        ]
+                        Element.none
+                    , row
+                        [ width fill
+                        , height (fillPortion 98)
+                        ]
+                        [ el
+                            [ width (fillPortion 1)
+                            ]
+                            Element.none
+                        , avatarView
+                            { name = "FankaDeli"
+                            , imageSrc = "/fankadeli.jpg"
+                            , scale = model.avatarScale
+                            }
+                        , el
+                            [ width (fillPortion 48)
+                            , height fill
+                            ]
+                            Element.none
+                        , avatarView
+                            { name = "FAM"
+                            , imageSrc = "/fam.jpg"
+                            , scale = model.avatarScale
+                            }
+                        , el
+                            [ width (fillPortion 1)
+                            ]
+                            Element.none
+                        ]
+                    ]
+                )
             , if model.isCenterLineVisible then
                 inFront
                     (row [ width fill, height fill ]
@@ -195,6 +243,30 @@ adminView model =
                         (text "Középvonal megjelenítése")
                 }
             )
+        , Input.slider
+            [ height (px 30)
+            , behindContent
+                (el
+                    [ width fill
+                    , height (px 2)
+                    , centerY
+                    , Background.color (rgb255 0x90 0x90 0x90)
+                    , Border.rounded 2
+                    ]
+                    Element.none
+                )
+            ]
+            { onChange = round >> AvatarScaleChange
+            , label =
+                Input.labelAbove []
+                    (text ("Avatár méret: " ++ String.fromInt model.avatarScale))
+            , min = 5
+            , max = 50
+            , step = Just 1
+            , value = toFloat model.avatarScale
+            , thumb =
+                Input.defaultThumb
+            }
         ]
 
 
@@ -213,3 +285,28 @@ body {
   box-sizing: border-box;
 }
 """
+
+
+avatarView : { name : String, imageSrc : String, scale : Int } -> Element msg
+avatarView { name, imageSrc, scale } =
+    column
+        [ width (fillPortion scale)
+        , height fill
+        , spacing (round (5 * toFloat scale ^ 0.4))
+        ]
+        [ image
+            [ width fill
+            , Border.rounded 10000
+            , clip
+            ]
+            { src = imageSrc
+            , description = ""
+            }
+        , el
+            [ Font.size (round (12 * toFloat scale ^ 0.5))
+            , Font.bold
+            , centerX
+            ]
+          <|
+            text name
+        ]

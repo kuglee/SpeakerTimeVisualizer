@@ -10,6 +10,7 @@ type alias BackendModel =
     { counter : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
+    , avatarScale : Int
     }
 
 
@@ -19,6 +20,7 @@ type alias FrontendModel =
     , counter : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
+    , avatarScale : Int
     , clientId : String
     }
 
@@ -29,6 +31,7 @@ type FrontendMsg
     | Decrement
     | IncrementAmountChange String
     | IsCenterLineVisibleChange Bool
+    | AvatarScaleChange Int
     | FNoop
 
 
@@ -36,6 +39,7 @@ type ToBackend
     = CounterChanged Int
     | IncrementAmountChanged Int
     | IsCenterLineVisibleChanged Bool
+    | AvatarScaleChanged Int
 
 
 type BackendMsg
@@ -47,3 +51,4 @@ type ToFrontend
     = CounterNewValue Int String
     | IncrementAmountNewValue Int String
     | IsCenterLineVisibleNewValue Bool String
+    | AvatarScaleNewValue Int String

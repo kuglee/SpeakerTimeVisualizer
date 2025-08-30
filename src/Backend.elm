@@ -22,6 +22,7 @@ init =
     ( { counter = 50
       , incrementAmount = 1
       , isCenterLineVisible = False
+      , avatarScale = 15
       }
     , Cmd.none
     )
@@ -36,6 +37,7 @@ update msg model =
                 [ sendToFrontend clientId <| CounterNewValue model.counter clientId
                 , sendToFrontend clientId <| IncrementAmountNewValue model.incrementAmount clientId
                 , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
+                , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
                 ]
             )
 
@@ -54,6 +56,9 @@ updateFromFrontend sessionId clientId msg model =
 
         IsCenterLineVisibleChanged value ->
             ( { model | isCenterLineVisible = value }, broadcast (IsCenterLineVisibleNewValue value clientId) )
+
+        AvatarScaleChanged value ->
+            ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
 
 
 subscriptions model =
