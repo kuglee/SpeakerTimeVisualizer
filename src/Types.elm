@@ -36,6 +36,7 @@ type FrontendMsg
     | IsCenterLineVisibleChange Bool
     | AvatarScaleChange Int
     | FankaDeliSideChange Side
+    | ResetCounterButtonTap
     | FNoop
 
 

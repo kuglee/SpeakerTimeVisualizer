@@ -114,6 +114,13 @@ update msg model =
             , sendToBackend (FankaDeliSideChanged newValue newCounter)
             )
 
+        ResetCounterButtonTap ->
+            let
+                newCounter =
+                    50
+            in
+            ( { model | counter = newCounter }, sendToBackend (CounterChanged newCounter) )
+
         FNoop ->
             ( model, Cmd.none )
 
@@ -321,6 +328,22 @@ adminView model =
                 , Input.option Right (text "Jobb")
                 ]
             }
+        , column []
+            [ el [ height (px 200) ] <| Element.none
+            , Input.button
+                [ Background.color (rgb255 0x90 0x90 0x90)
+                , padding 10
+                ]
+                { onPress = Just ResetCounterButtonTap
+                , label =
+                    el
+                        [ centerX
+                        , centerY
+                        ]
+                    <|
+                        text "Alaphelyzet"
+                }
+            ]
         ]
 
 
