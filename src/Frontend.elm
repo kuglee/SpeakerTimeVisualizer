@@ -1,12 +1,15 @@
 module Frontend exposing (Model, app)
 
+import Browser.Navigation
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import Html
 import Html.Attributes
 import Lamdera exposing (sendToBackend)
+import Route
 import Types exposing (..)
+import Url exposing (Url)
 
 
 type alias Model =
@@ -15,7 +18,7 @@ type alias Model =
 
 app =
     Lamdera.frontend
-        { init = \_ _ -> init
+        { init = init
         , update = update
         , updateFromBackend = updateFromBackend
         , view =
@@ -27,14 +30,16 @@ app =
                     ]
                 }
         , subscriptions = \_ -> Sub.none
-        , onUrlChange = \_ -> FNoop
+        , onUrlChange = UrlChanged
         , onUrlRequest = \_ -> FNoop
         }
 
 
-init : ( Model, Cmd FrontendMsg )
-init =
-    ( { counter = 50
+init : Url -> Browser.Navigation.Key -> ( FrontendModel, Cmd FrontendMsg )
+init url key =
+    ( { key = key
+      , currentRoute = Route.fromUrl url
+      , counter = 50
       , incrementAmount = 1
       , isCenterLineVisible = False
       , clientId = ""
@@ -46,6 +51,9 @@ init =
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
 update msg model =
     case msg of
+        UrlChanged url ->
+            ( { model | currentRoute = Route.fromUrl url }, Cmd.none )
+
         Increment ->
             let
                 newValue =
@@ -88,47 +96,22 @@ updateFromBackend msg model =
             ( { model | isCenterLineVisible = newValue, clientId = clientId }, Cmd.none )
 
 
-view : Model -> Element FrontendMsg
+view : FrontendModel -> Element FrontendMsg
 view model =
+    case model.currentRoute of
+        Just Route.AdminPanel ->
+            adminView model
+
+        Nothing ->
+            homeView model
+
+
+homeView : Model -> Element FrontendMsg
+homeView model =
     column
         [ spacing 20
         , width fill
         , height fill
-        , below
-            (column [ width fill, spacing 20, paddingXY 20 20 ]
-                [ row [ spacing 20 ]
-                    [ row [ spacing 10 ]
-                        [ Input.button
-                            buttonStyle
-                            { onPress = Just Decrement
-                            , label = text "<"
-                            }
-                        , text (String.fromInt model.counter ++ "%")
-                        , Input.button
-                            buttonStyle
-                            { onPress = Just Increment
-                            , label = text ">"
-                            }
-                        ]
-                    , Input.text [ width (px 80) ]
-                        { text = String.fromInt model.incrementAmount
-                        , onChange = IncrementAmountChange
-                        , placeholder = Nothing
-                        , label = Input.labelLeft [] (text "Nagyság:")
-                        }
-                    ]
-                , el []
-                    (Input.checkbox []
-                        { onChange = IsCenterLineVisibleChange
-                        , icon = Input.defaultCheckbox
-                        , checked = model.isCenterLineVisible
-                        , label =
-                            Input.labelRight []
-                                (text "Középvonal megjelenítése")
-                        }
-                    )
-                ]
-            )
         ]
         [ Element.html
             (Html.node "style"
@@ -175,6 +158,43 @@ view model =
                 ]
                 Element.none
             ]
+        ]
+
+
+adminView : Model -> Element FrontendMsg
+adminView model =
+    column [ width fill, spacing 20, paddingXY 20 20 ]
+        [ row [ spacing 20 ]
+            [ row [ spacing 10 ]
+                [ Input.button
+                    buttonStyle
+                    { onPress = Just Decrement
+                    , label = text "<"
+                    }
+                , text (String.fromInt model.counter ++ "%")
+                , Input.button
+                    buttonStyle
+                    { onPress = Just Increment
+                    , label = text ">"
+                    }
+                ]
+            , Input.text [ width (px 80) ]
+                { text = String.fromInt model.incrementAmount
+                , onChange = IncrementAmountChange
+                , placeholder = Nothing
+                , label = Input.labelLeft [] (text "Nagyság:")
+                }
+            ]
+        , el []
+            (Input.checkbox []
+                { onChange = IsCenterLineVisibleChange
+                , icon = Input.defaultCheckbox
+                , checked = model.isCenterLineVisible
+                , label =
+                    Input.labelRight []
+                        (text "Középvonal megjelenítése")
+                }
+            )
         ]
 
 

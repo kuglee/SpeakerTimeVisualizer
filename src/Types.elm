@@ -1,6 +1,9 @@
 module Types exposing (..)
 
+import Browser.Navigation
 import Lamdera exposing (ClientId, SessionId)
+import Route exposing (Route)
+import Url exposing (Url)
 
 
 type alias BackendModel =
@@ -11,7 +14,9 @@ type alias BackendModel =
 
 
 type alias FrontendModel =
-    { counter : Int
+    { key : Browser.Navigation.Key
+    , currentRoute : Maybe Route
+    , counter : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , clientId : String
@@ -19,7 +24,8 @@ type alias FrontendModel =
 
 
 type FrontendMsg
-    = Increment
+    = UrlChanged Url
+    | Increment
     | Decrement
     | IncrementAmountChange String
     | IsCenterLineVisibleChange Bool
