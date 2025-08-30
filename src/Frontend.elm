@@ -376,21 +376,29 @@ avatarView { sideData, side, scale } =
 
                 Right ->
                     alignRight
+
+        imageSize =
+            px (scale * 10)
     in
     column
-        [ height fill
-        , spacing (round (4 * toFloat scale ^ 0.4))
+        [ spacing (round (4 * toFloat scale ^ 0.4))
         , padding (round (5 * toFloat scale ^ 0.4))
         ]
-        [ image
-            [ width (px (scale * 10))
+        [ el
+            [ width imageSize
+            , height imageSize
             , Border.rounded 10000
             , clip
-            , alignment
             ]
-            { src = sideData.imageSrc
-            , description = ""
-            }
+          <|
+            image
+                [ width fill
+                , height fill
+                , alignment
+                ]
+                { src = sideData.imageSrc
+                , description = ""
+                }
         , el
             [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
