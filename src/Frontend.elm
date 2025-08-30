@@ -361,7 +361,6 @@ overscrollDisabledStyle =
     """
 body {
   overscroll-behavior: none;
-  box-sizing: border-box;
 }
 """
 
