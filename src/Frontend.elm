@@ -394,6 +394,7 @@ avatarView { sideData, side, scale } =
         , el
             [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
+            , Font.color (rgb255 0xFF 0xFF 0xFF)
             , alignment
             ]
           <|
