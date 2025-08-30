@@ -247,13 +247,25 @@ adminView model =
                 [ Input.button
                     buttonStyle
                     { onPress = Just Decrement
-                    , label = text "<"
+                    , label =
+                        el
+                            [ centerX
+                            , centerY
+                            ]
+                        <|
+                            text "<"
                     }
                 , text (String.fromInt model.counter ++ "%")
                 , Input.button
                     buttonStyle
                     { onPress = Just Increment
-                    , label = text ">"
+                    , label =
+                        el
+                            [ centerX
+                            , centerY
+                            ]
+                        <|
+                            text ">"
                     }
                 ]
             , Input.text [ width (px 80) ]
