@@ -8,7 +8,7 @@ import Url exposing (Url)
 
 
 type alias BackendModel =
-    { counter : Int
+    { splitRatio : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
@@ -19,7 +19,7 @@ type alias BackendModel =
 type alias FrontendModel =
     { key : Browser.Navigation.Key
     , currentRoute : Maybe Route
-    , counter : Int
+    , splitRatio : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
@@ -36,12 +36,12 @@ type FrontendMsg
     | IsCenterLineVisibleChange Bool
     | AvatarScaleChange Int
     | FankaDeliSideChange Side
-    | ResetCounterButtonTap
+    | ResetSplitRatioButtonTap
     | FNoop
 
 
 type ToBackend
-    = CounterChanged Int
+    = SplitRatioChanged Int
     | IncrementAmountChanged Int
     | IsCenterLineVisibleChanged Bool
     | AvatarScaleChanged Int
@@ -54,7 +54,7 @@ type BackendMsg
 
 
 type ToFrontend
-    = CounterNewValue Int String
+    = SplitRatioNewValue Int String
     | IncrementAmountNewValue Int String
     | IsCenterLineVisibleNewValue Bool String
     | AvatarScaleNewValue Int String

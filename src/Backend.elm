@@ -19,7 +19,7 @@ app =
 
 init : ( Model, Cmd BackendMsg )
 init =
-    ( { counter = 50
+    ( { splitRatio = 50
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
@@ -35,11 +35,11 @@ update msg model =
         ClientConnected sessionId clientId ->
             ( model
             , Cmd.batch
-                [ sendToFrontend clientId <| CounterNewValue model.counter clientId
+                [ sendToFrontend clientId <| SplitRatioNewValue model.splitRatio clientId
                 , sendToFrontend clientId <| IncrementAmountNewValue model.incrementAmount clientId
                 , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
                 , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
-                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.counter clientId
+                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.splitRatio clientId
                 ]
             )
 
@@ -50,8 +50,8 @@ update msg model =
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
 updateFromFrontend sessionId clientId msg model =
     case msg of
-        CounterChanged value ->
-            ( { model | counter = value }, broadcast (CounterNewValue value clientId) )
+        SplitRatioChanged value ->
+            ( { model | splitRatio = value }, broadcast (SplitRatioNewValue value clientId) )
 
         IncrementAmountChanged value ->
             ( { model | incrementAmount = value }, broadcast (IncrementAmountNewValue value clientId) )
@@ -62,12 +62,12 @@ updateFromFrontend sessionId clientId msg model =
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
 
-        FankaDeliSideChanged side counter ->
+        FankaDeliSideChanged side splitRatio ->
             ( { model
                 | fankadeliSide = side
-                , counter = counter
+                , splitRatio = splitRatio
               }
-            , broadcast (FankadeliSideNewValue side counter clientId)
+            , broadcast (FankadeliSideNewValue side splitRatio clientId)
             )
 
 

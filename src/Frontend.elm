@@ -57,7 +57,7 @@ init : Url -> Browser.Navigation.Key -> ( FrontendModel, Cmd FrontendMsg )
 init url key =
     ( { key = key
       , currentRoute = Route.fromUrl url
-      , counter = 50
+      , splitRatio = 50
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
@@ -77,16 +77,16 @@ update msg model =
         Increment ->
             let
                 newValue =
-                    min (model.counter + model.incrementAmount) 100
+                    min (model.splitRatio + model.incrementAmount) 100
             in
-            ( { model | counter = newValue }, sendToBackend (CounterChanged newValue) )
+            ( { model | splitRatio = newValue }, sendToBackend (SplitRatioChanged newValue) )
 
         Decrement ->
             let
                 newValue =
-                    max (model.counter - model.incrementAmount) 0
+                    max (model.splitRatio - model.incrementAmount) 0
             in
-            ( { model | counter = newValue }, sendToBackend (CounterChanged newValue) )
+            ( { model | splitRatio = newValue }, sendToBackend (SplitRatioChanged newValue) )
 
         IncrementAmountChange stringValue ->
             case String.toInt stringValue of
@@ -104,22 +104,22 @@ update msg model =
 
         FankaDeliSideChange newValue ->
             let
-                newCounter =
-                    100 - model.counter
+                newSplitRatio =
+                    100 - model.splitRatio
             in
             ( { model
                 | fankadeliSide = newValue
-                , counter = newCounter
+                , splitRatio = newSplitRatio
               }
-            , sendToBackend (FankaDeliSideChanged newValue newCounter)
+            , sendToBackend (FankaDeliSideChanged newValue newSplitRatio)
             )
 
-        ResetCounterButtonTap ->
+        ResetSplitRatioButtonTap ->
             let
-                newCounter =
+                newSplitRatio =
                     50
             in
-            ( { model | counter = newCounter }, sendToBackend (CounterChanged newCounter) )
+            ( { model | splitRatio = newSplitRatio }, sendToBackend (SplitRatioChanged newSplitRatio) )
 
         FNoop ->
             ( model, Cmd.none )
@@ -128,8 +128,8 @@ update msg model =
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
-        CounterNewValue newValue clientId ->
-            ( { model | counter = newValue, clientId = clientId }, Cmd.none )
+        SplitRatioNewValue newValue clientId ->
+            ( { model | splitRatio = newValue, clientId = clientId }, Cmd.none )
 
         IncrementAmountNewValue newValue clientId ->
             ( { model | incrementAmount = newValue, clientId = clientId }, Cmd.none )
@@ -140,10 +140,10 @@ updateFromBackend msg model =
         AvatarScaleNewValue newValue clientId ->
             ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
 
-        FankadeliSideNewValue newSideValue newCounterValue clientId ->
+        FankadeliSideNewValue newSideValue newSplitRatioValue clientId ->
             ( { model
                 | fankadeliSide = newSideValue
-                , counter = newCounterValue
+                , splitRatio = newSplitRatioValue
                 , clientId = clientId
               }
             , Cmd.none
@@ -232,13 +232,13 @@ homeView model =
             ]
             [ el
                 [ Background.color leftSideData.color
-                , width (fillPortion model.counter)
+                , width (fillPortion model.splitRatio)
                 , height fill
                 ]
                 Element.none
             , el
                 [ Background.color rightSideData.color
-                , width (fillPortion (100 - model.counter))
+                , width (fillPortion (100 - model.splitRatio))
                 , height fill
                 ]
                 Element.none
@@ -262,7 +262,7 @@ adminView model =
                         <|
                             text "<"
                     }
-                , text (String.fromInt model.counter ++ "%")
+                , text (String.fromInt model.splitRatio ++ "%")
                 , Input.button
                     buttonStyle
                     { onPress = Just Increment
@@ -334,7 +334,7 @@ adminView model =
                 [ Background.color (rgb255 0x90 0x90 0x90)
                 , padding 10
                 ]
-                { onPress = Just ResetCounterButtonTap
+                { onPress = Just ResetSplitRatioButtonTap
                 , label =
                     el
                         [ centerX
