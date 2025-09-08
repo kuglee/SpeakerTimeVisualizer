@@ -19,7 +19,8 @@ app =
 
 init : ( Model, Cmd BackendMsg )
 init =
-    ( { splitRatio = 50
+    ( { leftSideRatio = 0
+      , rightSideRatio = 0
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
@@ -35,11 +36,11 @@ update msg model =
         ClientConnected sessionId clientId ->
             ( model
             , Cmd.batch
-                [ sendToFrontend clientId <| SplitRatioNewValue model.splitRatio clientId
-                , sendToFrontend clientId <| IncrementAmountNewValue model.incrementAmount clientId
+                [ sendToFrontend clientId <| LeftSideRatioNewValue model.leftSideRatio clientId
+                , sendToFrontend clientId <| RightSideRatioNewValue model.rightSideRatio clientId
                 , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
                 , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
-                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.splitRatio clientId
+                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.leftSideRatio model.rightSideRatio clientId
                 ]
             )
 
@@ -50,8 +51,11 @@ update msg model =
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
 updateFromFrontend sessionId clientId msg model =
     case msg of
-        SplitRatioChanged value ->
-            ( { model | splitRatio = value }, broadcast (SplitRatioNewValue value clientId) )
+        LeftSideRatioChanged value ->
+            ( { model | leftSideRatio = value }, broadcast (LeftSideRatioNewValue value clientId) )
+
+        RightSideRatioChanged value ->
+            ( { model | rightSideRatio = value }, broadcast (RightSideRatioNewValue value clientId) )
 
         IncrementAmountChanged value ->
             ( { model | incrementAmount = value }, broadcast (IncrementAmountNewValue value clientId) )
@@ -62,12 +66,28 @@ updateFromFrontend sessionId clientId msg model =
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
 
-        FankaDeliSideChanged side splitRatio ->
-            ( { model
-                | fankadeliSide = side
-                , splitRatio = splitRatio
-              }
-            , broadcast (FankadeliSideNewValue side splitRatio clientId)
+        FankaDeliSideChanged side ->
+            let
+                newModel =
+                    { model
+                        | leftSideRatio = model.rightSideRatio
+                        , rightSideRatio = model.leftSideRatio
+                    }
+            in
+            ( newModel
+            , broadcast (FankadeliSideNewValue side newModel.leftSideRatio newModel.rightSideRatio clientId)
+            )
+
+        ResetRatiosButtonTapped leftSideRatio rightSideRatio ->
+            let
+                newModel =
+                    { model
+                        | leftSideRatio = leftSideRatio
+                        , rightSideRatio = rightSideRatio
+                    }
+            in
+            ( newModel
+            , broadcast (ResetRatiosNewValue newModel.leftSideRatio newModel.rightSideRatio clientId)
             )
 
 

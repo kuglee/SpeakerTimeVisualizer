@@ -8,7 +8,8 @@ import Url exposing (Url)
 
 
 type alias BackendModel =
-    { splitRatio : Int
+    { leftSideRatio : Int
+    , rightSideRatio : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
@@ -19,7 +20,8 @@ type alias BackendModel =
 type alias FrontendModel =
     { key : Browser.Navigation.Key
     , currentRoute : Maybe Route
-    , splitRatio : Int
+    , leftSideRatio : Int
+    , rightSideRatio : Int
     , incrementAmount : Int
     , isCenterLineVisible : Bool
     , avatarScale : Int
@@ -30,22 +32,26 @@ type alias FrontendModel =
 
 type FrontendMsg
     = UrlChanged Url
-    | Increment
-    | Decrement
+    | IncrementLeftSideRatio
+    | IncrementRightSideRatio
+    | LeftSideRatioChange String
+    | RightSideRatioChange String
     | IncrementAmountChange String
     | IsCenterLineVisibleChange Bool
     | AvatarScaleChange Int
     | FankaDeliSideChange Side
-    | ResetSplitRatioButtonTap
+    | ResetRatiosButtonTap
     | FNoop
 
 
 type ToBackend
-    = SplitRatioChanged Int
+    = LeftSideRatioChanged Int
+    | RightSideRatioChanged Int
     | IncrementAmountChanged Int
     | IsCenterLineVisibleChanged Bool
     | AvatarScaleChanged Int
-    | FankaDeliSideChanged Side Int
+    | FankaDeliSideChanged Side
+    | ResetRatiosButtonTapped Int Int
 
 
 type BackendMsg
@@ -54,11 +60,13 @@ type BackendMsg
 
 
 type ToFrontend
-    = SplitRatioNewValue Int String
+    = LeftSideRatioNewValue Int String
+    | RightSideRatioNewValue Int String
     | IncrementAmountNewValue Int String
     | IsCenterLineVisibleNewValue Bool String
     | AvatarScaleNewValue Int String
-    | FankadeliSideNewValue Side Int String
+    | FankadeliSideNewValue Side Int Int String
+    | ResetRatiosNewValue Int Int String
 
 
 type alias SideData =

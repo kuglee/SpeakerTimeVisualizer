@@ -57,7 +57,8 @@ init : Url -> Browser.Navigation.Key -> ( FrontendModel, Cmd FrontendMsg )
 init url key =
     ( { key = key
       , currentRoute = Route.fromUrl url
-      , splitRatio = 50
+      , leftSideRatio = 0
+      , rightSideRatio = 0
       , incrementAmount = 1
       , isCenterLineVisible = False
       , avatarScale = 15
@@ -74,19 +75,35 @@ update msg model =
         UrlChanged url ->
             ( { model | currentRoute = Route.fromUrl url }, Cmd.none )
 
-        Increment ->
+        IncrementLeftSideRatio ->
             let
                 newValue =
-                    min (model.splitRatio + model.incrementAmount) 100
+                    min (model.leftSideRatio + model.incrementAmount) 100
             in
-            ( { model | splitRatio = newValue }, sendToBackend (SplitRatioChanged newValue) )
+            ( { model | leftSideRatio = newValue }, sendToBackend (LeftSideRatioChanged newValue) )
 
-        Decrement ->
+        IncrementRightSideRatio ->
             let
                 newValue =
-                    max (model.splitRatio - model.incrementAmount) 0
+                    min (model.rightSideRatio + model.incrementAmount) 100
             in
-            ( { model | splitRatio = newValue }, sendToBackend (SplitRatioChanged newValue) )
+            ( { model | rightSideRatio = newValue }, sendToBackend (RightSideRatioChanged newValue) )
+
+        LeftSideRatioChange stringValue ->
+            case String.toInt stringValue of
+                Just intValue ->
+                    ( { model | leftSideRatio = intValue }, sendToBackend (LeftSideRatioChanged intValue) )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        RightSideRatioChange stringValue ->
+            case String.toInt stringValue of
+                Just intValue ->
+                    ( { model | rightSideRatio = intValue }, sendToBackend (LeftSideRatioChanged intValue) )
+
+                _ ->
+                    ( model, Cmd.none )
 
         IncrementAmountChange stringValue ->
             case String.toInt stringValue of
@@ -103,23 +120,23 @@ update msg model =
             ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
 
         FankaDeliSideChange newValue ->
-            let
-                newSplitRatio =
-                    100 - model.splitRatio
-            in
             ( { model
                 | fankadeliSide = newValue
-                , splitRatio = newSplitRatio
               }
-            , sendToBackend (FankaDeliSideChanged newValue newSplitRatio)
+            , sendToBackend (FankaDeliSideChanged newValue)
             )
 
-        ResetSplitRatioButtonTap ->
+        ResetRatiosButtonTap ->
             let
-                newSplitRatio =
-                    50
+                newModel =
+                    { model
+                        | leftSideRatio = 0
+                        , rightSideRatio = 0
+                    }
             in
-            ( { model | splitRatio = newSplitRatio }, sendToBackend (SplitRatioChanged newSplitRatio) )
+            ( newModel
+            , sendToBackend (ResetRatiosButtonTapped newModel.leftSideRatio newModel.rightSideRatio)
+            )
 
         FNoop ->
             ( model, Cmd.none )
@@ -128,8 +145,11 @@ update msg model =
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
-        SplitRatioNewValue newValue clientId ->
-            ( { model | splitRatio = newValue, clientId = clientId }, Cmd.none )
+        LeftSideRatioNewValue newValue clientId ->
+            ( { model | leftSideRatio = newValue, clientId = clientId }, Cmd.none )
+
+        RightSideRatioNewValue newValue clientId ->
+            ( { model | rightSideRatio = newValue, clientId = clientId }, Cmd.none )
 
         IncrementAmountNewValue newValue clientId ->
             ( { model | incrementAmount = newValue, clientId = clientId }, Cmd.none )
@@ -140,10 +160,20 @@ updateFromBackend msg model =
         AvatarScaleNewValue newValue clientId ->
             ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
 
-        FankadeliSideNewValue newSideValue newSplitRatioValue clientId ->
+        FankadeliSideNewValue newSideValue leftSideRatio rightSideRatio clientId ->
             ( { model
                 | fankadeliSide = newSideValue
-                , splitRatio = newSplitRatioValue
+                , leftSideRatio = leftSideRatio
+                , rightSideRatio = rightSideRatio
+                , clientId = clientId
+              }
+            , Cmd.none
+            )
+
+        ResetRatiosNewValue leftSideRatio rightSideRatio clientId ->
+            ( { model
+                | leftSideRatio = leftSideRatio
+                , rightSideRatio = rightSideRatio
                 , clientId = clientId
               }
             , Cmd.none
@@ -180,6 +210,7 @@ homeView model =
         [ spacing 20
         , width fill
         , height fill
+        , Background.color (rgba255 0x00 0x00 0x00 1)
         ]
         [ Element.html
             (Html.node "style"
@@ -232,18 +263,42 @@ homeView model =
               else
                 htmlAttribute (Html.Attributes.class "")
             ]
-            [ el
-                [ Background.color leftSideData.color
-                , width (fillPortion model.splitRatio)
+            [ row
+                [ width (fillPortion 50)
                 , height fill
+                , spaceEvenly
                 ]
-                Element.none
-            , el
-                [ Background.color rightSideData.color
-                , width (fillPortion (100 - model.splitRatio))
+                [ el
+                    [ Background.color (rgba255 0x00 0x00 0x00 0)
+                    , width (fillPortion (100 - model.leftSideRatio))
+                    , height fill
+                    ]
+                    Element.none
+                , el
+                    [ Background.color leftSideData.color
+                    , width (fillPortion model.leftSideRatio)
+                    , height fill
+                    ]
+                    Element.none
+                ]
+            , row
+                [ width (fillPortion 50)
                 , height fill
+                , spaceEvenly
                 ]
-                Element.none
+                [ el
+                    [ Background.color rightSideData.color
+                    , width (fillPortion model.rightSideRatio)
+                    , height fill
+                    ]
+                    Element.none
+                , el
+                    [ Background.color (rgba255 0x00 0x00 0x00 0)
+                    , width (fillPortion (100 - model.rightSideRatio))
+                    , height fill
+                    ]
+                    Element.none
+                ]
             ]
         ]
 
@@ -252,29 +307,28 @@ adminView : Model -> Element FrontendMsg
 adminView model =
     column [ width fill, spacing 20, paddingXY 20 20 ]
         [ row [ spacing 20 ]
-            [ row [ spacing 10 ]
+            [ row [ spacing 50 ]
                 [ Input.button
                     buttonStyle
-                    { onPress = Just Decrement
+                    { onPress = Just IncrementLeftSideRatio
                     , label =
                         el
                             [ centerX
                             , centerY
                             ]
                         <|
-                            text "<"
+                            text ("< " ++ String.fromInt model.leftSideRatio ++ "%")
                     }
-                , text (String.fromInt model.splitRatio ++ "%")
                 , Input.button
                     buttonStyle
-                    { onPress = Just Increment
+                    { onPress = Just IncrementRightSideRatio
                     , label =
                         el
                             [ centerX
                             , centerY
                             ]
                         <|
-                            text ">"
+                            text (String.fromInt model.rightSideRatio ++ "%" ++ " >")
                     }
                 ]
             , Input.text [ width (px 80) ]
@@ -336,7 +390,7 @@ adminView model =
                 [ Background.color (rgb255 0x90 0x90 0x90)
                 , padding 10
                 ]
-                { onPress = Just ResetSplitRatioButtonTap
+                { onPress = Just ResetRatiosButtonTap
                 , label =
                     el
                         [ centerX
@@ -352,7 +406,7 @@ adminView model =
 buttonStyle =
     [ Background.color (rgb255 0x90 0x90 0x90)
     , height (px 50)
-    , width (px 50)
+    , width (px 80)
     ]
 
 
