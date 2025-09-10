@@ -21,7 +21,7 @@ init : ( Model, Cmd BackendMsg )
 init =
     ( { leftSideRatio = 0
       , rightSideRatio = 0
-      , incrementAmount = 1
+      , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
       }
@@ -55,8 +55,18 @@ updateFromFrontend sessionId clientId msg model =
         RightSideRatioChanged value ->
             ( { model | rightSideRatio = value }, broadcast (RightSideRatioNewValue value clientId) )
 
-        IncrementAmountChanged value ->
-            ( { model | incrementAmount = value }, broadcast (IncrementAmountNewValue value clientId) )
+        RangeChanged incrementAmount leftSideRatio rightSideRatio ->
+            let
+                newModel =
+                    { model
+                        | range = incrementAmount
+                        , leftSideRatio = leftSideRatio
+                        , rightSideRatio = rightSideRatio
+                    }
+            in
+            ( model
+            , broadcast (RangeNewValue newModel.range newModel.leftSideRatio newModel.rightSideRatio clientId)
+            )
 
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )

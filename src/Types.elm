@@ -10,7 +10,7 @@ import Url exposing (Url)
 type alias BackendModel =
     { leftSideRatio : Int
     , rightSideRatio : Int
-    , incrementAmount : Int
+    , range : Int
     , avatarScale : Int
     , fankadeliSide : Side
     }
@@ -21,7 +21,7 @@ type alias FrontendModel =
     , currentRoute : Maybe Route
     , leftSideRatio : Int
     , rightSideRatio : Int
-    , incrementAmount : Int
+    , range : Int
     , avatarScale : Int
     , fankadeliSide : Side
     , clientId : String
@@ -34,9 +34,7 @@ type FrontendMsg
     | DecrementLeftSideRatio
     | IncrementRightSideRatio
     | DecrementRightSideRatio
-    | LeftSideRatioChange String
-    | RightSideRatioChange String
-    | IncrementAmountChange String
+    | RangeChange Int
     | AvatarScaleChange Int
     | FankaDeliSideChange
     | ResetRatiosButtonTap
@@ -50,7 +48,7 @@ type FrontendMsg
 type ToBackend
     = LeftSideRatioChanged Int
     | RightSideRatioChanged Int
-    | IncrementAmountChanged Int
+    | RangeChanged Int Int Int
     | AvatarScaleChanged Int
     | FankaDeliSideChanged Side
     | ResetRatiosButtonTapped Int Int
@@ -64,7 +62,7 @@ type BackendMsg
 type ToFrontend
     = LeftSideRatioNewValue Int String
     | RightSideRatioNewValue Int String
-    | IncrementAmountNewValue Int String
+    | RangeNewValue Int Int Int String
     | AvatarScaleNewValue Int String
     | FankadeliSideNewValue Side Int Int String
     | ResetRatiosNewValue Int Int String

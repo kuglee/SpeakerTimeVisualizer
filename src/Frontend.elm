@@ -10,6 +10,7 @@ import Element.Input as Input
 import Html
 import Json.Decode as Decode
 import Lamdera exposing (sendToBackend)
+import Round
 import Route
 import Types exposing (..)
 import Url exposing (Url)
@@ -60,7 +61,7 @@ init url key =
       , currentRoute = Route.fromUrl url
       , leftSideRatio = 0
       , rightSideRatio = 0
-      , incrementAmount = 1
+      , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
       , clientId = ""
@@ -82,10 +83,10 @@ update msg model =
                 newValue =
                     case operation of
                         Increment ->
-                            min (model.leftSideRatio + model.incrementAmount) 100
+                            min (model.leftSideRatio + 1) model.range
 
                         Decrement ->
-                            max (model.leftSideRatio - model.incrementAmount) 0
+                            max (model.leftSideRatio - 1) 0
             in
             ( { model | leftSideRatio = newValue }, sendToBackend (LeftSideRatioChanged newValue) )
 
@@ -94,10 +95,10 @@ update msg model =
                 newValue =
                     case operation of
                         Increment ->
-                            min (model.rightSideRatio + model.incrementAmount) 100
+                            min (model.rightSideRatio + 1) model.range
 
                         Decrement ->
-                            max (model.rightSideRatio - model.incrementAmount) 0
+                            max (model.rightSideRatio - 1) 0
             in
             ( { model | rightSideRatio = newValue }, sendToBackend (RightSideRatioChanged newValue) )
     in
@@ -117,29 +118,18 @@ update msg model =
         DecrementRightSideRatio ->
             updateRightSideRatio Decrement
 
-        LeftSideRatioChange stringValue ->
-            case String.toInt stringValue of
-                Just intValue ->
-                    ( { model | leftSideRatio = intValue }, sendToBackend (LeftSideRatioChanged intValue) )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        RightSideRatioChange stringValue ->
-            case String.toInt stringValue of
-                Just intValue ->
-                    ( { model | rightSideRatio = intValue }, sendToBackend (LeftSideRatioChanged intValue) )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        IncrementAmountChange stringValue ->
-            case String.toInt stringValue of
-                Just intValue ->
-                    ( { model | incrementAmount = intValue }, sendToBackend (IncrementAmountChanged intValue) )
-
-                _ ->
-                    ( model, Cmd.none )
+        RangeChange newrange ->
+            let
+                newModel =
+                    { model
+                        | range = newrange
+                        , leftSideRatio = min model.leftSideRatio newrange
+                        , rightSideRatio = min model.rightSideRatio newrange
+                    }
+            in
+            ( newModel
+            , sendToBackend (RangeChanged newModel.range newModel.leftSideRatio newModel.rightSideRatio)
+            )
 
         AvatarScaleChange newValue ->
             ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
@@ -197,8 +187,15 @@ updateFromBackend msg model =
         RightSideRatioNewValue newValue clientId ->
             ( { model | rightSideRatio = newValue, clientId = clientId }, Cmd.none )
 
-        IncrementAmountNewValue newValue clientId ->
-            ( { model | incrementAmount = newValue, clientId = clientId }, Cmd.none )
+        RangeNewValue range leftSideRatio rightSideRatio clientId ->
+            ( { model
+                | range = range
+                , leftSideRatio = leftSideRatio
+                , rightSideRatio = rightSideRatio
+                , clientId = clientId
+              }
+            , Cmd.none
+            )
 
         AvatarScaleNewValue newValue clientId ->
             ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
@@ -291,44 +288,50 @@ homeView model =
                     ]
                 )
             ]
-            [ row
-                [ width (fillPortion 50)
-                , height fill
-                , spaceEvenly
-                ]
-                [ el
-                    [ Background.color (rgba255 0x00 0x00 0x00 0)
-                    , width (fillPortion (100 - model.leftSideRatio))
-                    , height fill
-                    ]
-                    Element.none
-                , el
-                    [ Background.color leftSideData.color
-                    , width (fillPortion model.leftSideRatio)
-                    , height fill
-                    ]
-                    Element.none
-                ]
-            , row
-                [ width (fillPortion 50)
-                , height fill
-                , spaceEvenly
-                ]
-                [ el
-                    [ Background.color rightSideData.color
-                    , width (fillPortion model.rightSideRatio)
-                    , height fill
-                    ]
-                    Element.none
-                , el
-                    [ Background.color (rgba255 0x00 0x00 0x00 0)
-                    , width (fillPortion (100 - model.rightSideRatio))
-                    , height fill
-                    ]
-                    Element.none
-                ]
+            [ sideView
+                { side = Left
+                , range = model.range
+                , ratio = model.leftSideRatio
+                , color = leftSideData.color
+                }
+            , sideView
+                { side = Right
+                , range = model.range
+                , ratio = model.rightSideRatio
+                , color = rightSideData.color
+                }
             ]
         ]
+
+
+sideView : { side : Side, ratio : Int, range : Int, color : Color } -> Element msg
+sideView { side, ratio, range, color } =
+    row
+        [ width (fillPortion 50)
+        , height fill
+        , spaceEvenly
+        ]
+        ([ el
+            [ Background.color (rgba255 0x00 0x00 0x00 0)
+            , width (fillPortion (range - ratio))
+            , height fill
+            ]
+            Element.none
+         , el
+            [ Background.color color
+            , width (fillPortion ratio)
+            , height fill
+            ]
+            Element.none
+         ]
+            |> (case side of
+                    Right ->
+                        List.reverse
+
+                    Left ->
+                        identity
+               )
+        )
 
 
 adminView : Model -> Element FrontendMsg
@@ -357,6 +360,7 @@ adminView model =
                     { decrementMsg = DecrementLeftSideRatio
                     , incrementMsg = IncrementLeftSideRatio
                     , ratio = model.leftSideRatio
+                    , range = model.range
                     }
                 ]
             , row [ spacing 10 ]
@@ -366,14 +370,33 @@ adminView model =
                     { decrementMsg = DecrementRightSideRatio
                     , incrementMsg = IncrementRightSideRatio
                     , ratio = model.rightSideRatio
+                    , range = model.range
                     }
                 ]
             ]
-        , Input.text [ width (px 80) ]
-            { text = String.fromInt model.incrementAmount
-            , onChange = IncrementAmountChange
-            , placeholder = Nothing
-            , label = Input.labelLeft [] (text "Nagyság:")
+        , Input.slider
+            [ height (px 30)
+            , behindContent
+                (el
+                    [ width fill
+                    , height (px 2)
+                    , centerY
+                    , Background.color (rgb255 0x90 0x90 0x90)
+                    , Border.rounded 2
+                    ]
+                    Element.none
+                )
+            ]
+            { onChange = round >> RangeChange
+            , label =
+                Input.labelAbove []
+                    (text ("Skála: " ++ String.fromInt model.range ++ " lépés"))
+            , min = 50
+            , max = 500
+            , step = Just 50
+            , value = toFloat model.range
+            , thumb =
+                Input.defaultThumb
             }
         , Input.slider
             [ height (px 30)
@@ -431,8 +454,20 @@ adminView model =
         ]
 
 
-sideControl : { decrementMsg : msg, incrementMsg : msg, ratio : Int } -> Element msg
-sideControl { decrementMsg, incrementMsg, ratio } =
+sideControl : { decrementMsg : msg, incrementMsg : msg, ratio : Int, range : Int } -> Element msg
+sideControl { decrementMsg, incrementMsg, ratio, range } =
+    let
+        percentage =
+            let
+                decimals =
+                    if range > 100 then
+                        2
+
+                    else
+                        0
+            in
+            Round.round decimals (toFloat ratio / toFloat range * 100)
+    in
     row [ spacing 10 ]
         [ Input.button
             buttonStyle
@@ -445,7 +480,7 @@ sideControl { decrementMsg, incrementMsg, ratio } =
                 <|
                     text "< "
             }
-        , text (String.fromInt ratio ++ "%")
+        , text (percentage ++ "%")
         , Input.button
             buttonStyle
             { onPress = Just incrementMsg
