@@ -534,12 +534,12 @@ avatarView { sideData, side, scale } =
             , height imageSize
             , Border.rounded 10000
             , clip
+            , alignment
             ]
           <|
             image
                 [ width fill
                 , height fill
-                , alignment
                 ]
                 { src = sideData.imageSrc
                 , description = ""
