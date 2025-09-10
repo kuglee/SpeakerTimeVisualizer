@@ -31,7 +31,9 @@ type alias FrontendModel =
 type FrontendMsg
     = UrlChanged Url
     | IncrementLeftSideRatio
+    | DecrementLeftSideRatio
     | IncrementRightSideRatio
+    | DecrementRightSideRatio
     | LeftSideRatioChange String
     | RightSideRatioChange String
     | IncrementAmountChange String

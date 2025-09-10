@@ -108,8 +108,14 @@ update msg model =
         IncrementLeftSideRatio ->
             updateLeftSideRatio Increment
 
+        DecrementLeftSideRatio ->
+            updateLeftSideRatio Decrement
+
         IncrementRightSideRatio ->
             updateRightSideRatio Increment
+
+        DecrementRightSideRatio ->
+            updateRightSideRatio Decrement
 
         LeftSideRatioChange stringValue ->
             case String.toInt stringValue of
@@ -332,38 +338,43 @@ adminView model =
         , spacing 20
         , paddingXY 20 20
         ]
-        [ row [ spacing 20 ]
-            [ row [ spacing 50 ]
-                [ Input.button
-                    buttonStyle
-                    { onPress = Just IncrementLeftSideRatio
-                    , label =
-                        el
-                            [ centerX
-                            , centerY
-                            ]
-                        <|
-                            text ("< " ++ String.fromInt model.leftSideRatio ++ "%")
-                    }
-                , Input.button
-                    buttonStyle
-                    { onPress = Just IncrementRightSideRatio
-                    , label =
-                        el
-                            [ centerX
-                            , centerY
-                            ]
-                        <|
-                            text (String.fromInt model.rightSideRatio ++ "%" ++ " >")
+        [ column
+            [ width fill
+            , spacing 50
+            ]
+            [ row [ spacing 10 ]
+                [ el
+                    [ width fill
+                    ]
+                  <|
+                    el
+                        [ width (px 50)
+                        , alignRight
+                        ]
+                    <|
+                        text "Bal:"
+                , sideControl
+                    { decrementMsg = DecrementLeftSideRatio
+                    , incrementMsg = IncrementLeftSideRatio
+                    , ratio = model.leftSideRatio
                     }
                 ]
-            , Input.text [ width (px 80) ]
-                { text = String.fromInt model.incrementAmount
-                , onChange = IncrementAmountChange
-                , placeholder = Nothing
-                , label = Input.labelLeft [] (text "Nagyság:")
-                }
+            , row [ spacing 10 ]
+                [ el [ width (px 50) ] <|
+                    text "Jobb:"
+                , sideControl
+                    { decrementMsg = DecrementRightSideRatio
+                    , incrementMsg = IncrementRightSideRatio
+                    , ratio = model.rightSideRatio
+                    }
+                ]
             ]
+        , Input.text [ width (px 80) ]
+            { text = String.fromInt model.incrementAmount
+            , onChange = IncrementAmountChange
+            , placeholder = Nothing
+            , label = Input.labelLeft [] (text "Nagyság:")
+            }
         , Input.slider
             [ height (px 30)
             , behindContent
@@ -420,10 +431,39 @@ adminView model =
         ]
 
 
+sideControl : { decrementMsg : msg, incrementMsg : msg, ratio : Int } -> Element msg
+sideControl { decrementMsg, incrementMsg, ratio } =
+    row [ spacing 10 ]
+        [ Input.button
+            buttonStyle
+            { onPress = Just decrementMsg
+            , label =
+                el
+                    [ centerX
+                    , centerY
+                    ]
+                <|
+                    text "< "
+            }
+        , text (String.fromInt ratio ++ "%")
+        , Input.button
+            buttonStyle
+            { onPress = Just incrementMsg
+            , label =
+                el
+                    [ centerX
+                    , centerY
+                    ]
+                <|
+                    text ">"
+            }
+        ]
+
+
 buttonStyle =
     [ Background.color (rgb255 0x90 0x90 0x90)
     , height (px 50)
-    , width (px 80)
+    , width (px 50)
     ]
 
 
