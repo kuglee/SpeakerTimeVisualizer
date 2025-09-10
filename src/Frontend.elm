@@ -335,7 +335,7 @@ adminView : Model -> Element FrontendMsg
 adminView model =
     column
         [ width fill
-        , spacing 20
+        , spacing 30
         , paddingXY 20 20
         ]
         [ column
