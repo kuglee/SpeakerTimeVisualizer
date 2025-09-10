@@ -115,11 +115,20 @@ update msg model =
         AvatarScaleChange newValue ->
             ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
 
-        FankaDeliSideChange newValue ->
+        FankaDeliSideChange ->
+            let
+                newSide =
+                    case model.fankadeliSide of
+                        Left ->
+                            Right
+
+                        Right ->
+                            Left
+            in
             ( { model
-                | fankadeliSide = newValue
+                | fankadeliSide = newSide
               }
-            , sendToBackend (FankaDeliSideChanged newValue)
+            , sendToBackend (FankaDeliSideChanged newSide)
             )
 
         ResetRatiosButtonTap ->
@@ -333,17 +342,18 @@ adminView model =
             , thumb =
                 Input.defaultThumb
             }
-        , Input.radio
-            [ padding 10
-            , spacing 20
+        , Input.button
+            [ Background.color (rgb255 0x90 0x90 0x90)
+            , padding 10
             ]
-            { onChange = FankaDeliSideChange
-            , selected = Just model.fankadeliSide
-            , label = Input.labelAbove [] (text "FankaDeli oldal")
-            , options =
-                [ Input.option Left (text "Bal")
-                , Input.option Right (text "Jobb")
-                ]
+            { onPress = Just FankaDeliSideChange
+            , label =
+                el
+                    [ centerX
+                    , centerY
+                    ]
+                <|
+                    text "Oldalcsere"
             }
         , column []
             [ el [ height (px 200) ] <| Element.none

@@ -36,7 +36,7 @@ type FrontendMsg
     | RightSideRatioChange String
     | IncrementAmountChange String
     | AvatarScaleChange Int
-    | FankaDeliSideChange Side
+    | FankaDeliSideChange
     | ResetRatiosButtonTap
     | FNoop
 
