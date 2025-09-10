@@ -24,6 +24,7 @@ init =
       , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
+      , theme = Light
       }
     , Cmd.none
     )
@@ -94,6 +95,9 @@ updateFromFrontend sessionId clientId msg model =
             ( newModel
             , broadcast (ResetRatiosNewValue newModel.leftSideRatio newModel.rightSideRatio clientId)
             )
+
+        ThemeChanged theme ->
+            ( { model | theme = theme }, broadcast (ThemeNewValue theme clientId) )
 
 
 subscriptions model =

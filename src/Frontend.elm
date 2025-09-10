@@ -64,6 +64,7 @@ init url key =
       , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
+      , theme = Light
       , clientId = ""
       }
     , Cmd.none
@@ -177,6 +178,9 @@ update msg model =
         FNoop ->
             ( model, Cmd.none )
 
+        ThemeChange theme ->
+            ( { model | theme = theme }, sendToBackend (ThemeChanged theme) )
+
 
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
@@ -219,6 +223,9 @@ updateFromBackend msg model =
             , Cmd.none
             )
 
+        ThemeNewValue theme clientId ->
+            ( { model | theme = theme, clientId = clientId }, Cmd.none )
+
 
 subscriptions : Model -> Sub FrontendMsg
 subscriptions model =
@@ -252,12 +259,28 @@ homeView model =
 
         rightSideData =
             getSideData Right
+
+        backgroundColor =
+            case model.theme of
+                Light ->
+                    rgb255 0xFF 0xFF 0xFF
+
+                Dark ->
+                    rgb255 0x00 0x00 0x00
+
+        textColor =
+            case model.theme of
+                Light ->
+                    rgb255 0x00 0x00 0x00
+
+                Dark ->
+                    rgb255 0xFF 0xFF 0xFF
     in
     column
         [ spacing 20
         , width fill
         , height fill
-        , Background.color (rgba255 0x00 0x00 0x00 1)
+        , Background.color backgroundColor
         ]
         [ Element.html
             (Html.node "style"
@@ -278,12 +301,14 @@ homeView model =
                             leftSideData
                         , side = Left
                         , scale = model.avatarScale
+                        , labelColor = textColor
                         }
                     , avatarView
                         { sideData =
                             rightSideData
                         , side = Right
                         , scale = model.avatarScale
+                        , labelColor = textColor
                         }
                     ]
                 )
@@ -435,6 +460,18 @@ adminView model =
                 <|
                     text "Oldalcsere"
             }
+        , Input.radio
+            [ padding 10
+            , spacing 20
+            ]
+            { onChange = ThemeChange
+            , selected = Just model.theme
+            , label = Input.labelAbove [] (text "Téma")
+            , options =
+                [ Input.option Light (text "Világos")
+                , Input.option Dark (text "Sötét")
+                ]
+            }
         , column []
             [ el [ height (px 200) ] <| Element.none
             , Input.button
@@ -511,8 +548,8 @@ body {
 """
 
 
-avatarView : { sideData : SideData, side : Side, scale : Int } -> Element msg
-avatarView { sideData, side, scale } =
+avatarView : { sideData : SideData, side : Side, scale : Int, labelColor : Color } -> Element msg
+avatarView { sideData, side, scale, labelColor } =
     let
         alignment =
             case side of
@@ -547,7 +584,7 @@ avatarView { sideData, side, scale } =
         , el
             [ Font.size (round (10 * toFloat scale ^ 0.5))
             , Font.bold
-            , Font.color (rgb255 0xFF 0xFF 0xFF)
+            , Font.color labelColor
             , alignment
             ]
           <|
