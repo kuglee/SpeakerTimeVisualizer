@@ -11,7 +11,6 @@ type alias BackendModel =
     { leftSideRatio : Int
     , rightSideRatio : Int
     , incrementAmount : Int
-    , isCenterLineVisible : Bool
     , avatarScale : Int
     , fankadeliSide : Side
     }
@@ -23,7 +22,6 @@ type alias FrontendModel =
     , leftSideRatio : Int
     , rightSideRatio : Int
     , incrementAmount : Int
-    , isCenterLineVisible : Bool
     , avatarScale : Int
     , fankadeliSide : Side
     , clientId : String
@@ -37,7 +35,6 @@ type FrontendMsg
     | LeftSideRatioChange String
     | RightSideRatioChange String
     | IncrementAmountChange String
-    | IsCenterLineVisibleChange Bool
     | AvatarScaleChange Int
     | FankaDeliSideChange Side
     | ResetRatiosButtonTap
@@ -48,7 +45,6 @@ type ToBackend
     = LeftSideRatioChanged Int
     | RightSideRatioChanged Int
     | IncrementAmountChanged Int
-    | IsCenterLineVisibleChanged Bool
     | AvatarScaleChanged Int
     | FankaDeliSideChanged Side
     | ResetRatiosButtonTapped Int Int
@@ -63,7 +59,6 @@ type ToFrontend
     = LeftSideRatioNewValue Int String
     | RightSideRatioNewValue Int String
     | IncrementAmountNewValue Int String
-    | IsCenterLineVisibleNewValue Bool String
     | AvatarScaleNewValue Int String
     | FankadeliSideNewValue Side Int Int String
     | ResetRatiosNewValue Int Int String

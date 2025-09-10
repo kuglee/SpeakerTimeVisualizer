@@ -22,7 +22,6 @@ init =
     ( { leftSideRatio = 0
       , rightSideRatio = 0
       , incrementAmount = 1
-      , isCenterLineVisible = False
       , avatarScale = 15
       , fankadeliSide = Left
       }
@@ -38,7 +37,6 @@ update msg model =
             , Cmd.batch
                 [ sendToFrontend clientId <| LeftSideRatioNewValue model.leftSideRatio clientId
                 , sendToFrontend clientId <| RightSideRatioNewValue model.rightSideRatio clientId
-                , sendToFrontend clientId <| IsCenterLineVisibleNewValue model.isCenterLineVisible clientId
                 , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
                 , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.leftSideRatio model.rightSideRatio clientId
                 ]
@@ -59,9 +57,6 @@ updateFromFrontend sessionId clientId msg model =
 
         IncrementAmountChanged value ->
             ( { model | incrementAmount = value }, broadcast (IncrementAmountNewValue value clientId) )
-
-        IsCenterLineVisibleChanged value ->
-            ( { model | isCenterLineVisible = value }, broadcast (IsCenterLineVisibleNewValue value clientId) )
 
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )

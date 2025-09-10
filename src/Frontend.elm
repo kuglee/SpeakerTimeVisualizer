@@ -60,7 +60,6 @@ init url key =
       , leftSideRatio = 0
       , rightSideRatio = 0
       , incrementAmount = 1
-      , isCenterLineVisible = False
       , avatarScale = 15
       , fankadeliSide = Left
       , clientId = ""
@@ -113,9 +112,6 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        IsCenterLineVisibleChange newValue ->
-            ( { model | isCenterLineVisible = newValue }, sendToBackend (IsCenterLineVisibleChanged newValue) )
-
         AvatarScaleChange newValue ->
             ( { model | avatarScale = newValue }, sendToBackend (AvatarScaleChanged newValue) )
 
@@ -153,9 +149,6 @@ updateFromBackend msg model =
 
         IncrementAmountNewValue newValue clientId ->
             ( { model | incrementAmount = newValue, clientId = clientId }, Cmd.none )
-
-        IsCenterLineVisibleNewValue newValue clientId ->
-            ( { model | isCenterLineVisible = newValue, clientId = clientId }, Cmd.none )
 
         AvatarScaleNewValue newValue clientId ->
             ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
@@ -240,28 +233,6 @@ homeView model =
                         }
                     ]
                 )
-            , if model.isCenterLineVisible then
-                inFront
-                    (row [ width fill, height fill ]
-                        [ el
-                            [ width (fillPortion (50 - (model.incrementAmount // 2)))
-                            ]
-                            Element.none
-                        , el
-                            [ width (fillPortion model.incrementAmount)
-                            , Background.color (rgb255 0x00 0x00 0x00)
-                            , height fill
-                            ]
-                            Element.none
-                        , el
-                            [ width (fillPortion (50 - (model.incrementAmount // 2)))
-                            ]
-                            Element.none
-                        ]
-                    )
-
-              else
-                htmlAttribute (Html.Attributes.class "")
             ]
             [ row
                 [ width (fillPortion 50)
@@ -338,16 +309,6 @@ adminView model =
                 , label = Input.labelLeft [] (text "Nagyság:")
                 }
             ]
-        , el []
-            (Input.checkbox []
-                { onChange = IsCenterLineVisibleChange
-                , icon = Input.defaultCheckbox
-                , checked = model.isCenterLineVisible
-                , label =
-                    Input.labelRight []
-                        (text "Középvonal megjelenítése")
-                }
-            )
         , Input.slider
             [ height (px 30)
             , behindContent
