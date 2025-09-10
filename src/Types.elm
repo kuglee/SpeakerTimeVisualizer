@@ -38,6 +38,10 @@ type FrontendMsg
     | AvatarScaleChange Int
     | FankaDeliSideChange
     | ResetRatiosButtonTap
+    | LeftArrowKeyTap
+    | RightArrowKeyTap
+    | ShiftLeftArrowKeyTap
+    | ShiftRightArrowKeyTap
     | FNoop
 
 

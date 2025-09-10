@@ -1,5 +1,6 @@
 module Frontend exposing (Model, app)
 
+import Browser.Events
 import Browser.Navigation
 import Element exposing (..)
 import Element.Background as Background
@@ -7,7 +8,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html
-import Html.Attributes
+import Json.Decode as Decode
 import Lamdera exposing (sendToBackend)
 import Route
 import Types exposing (..)
@@ -31,7 +32,7 @@ app =
                         (view model)
                     ]
                 }
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = \_ -> FNoop
         }
@@ -68,25 +69,47 @@ init url key =
     )
 
 
+type RatioOperation
+    = Increment
+    | Decrement
+
+
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
 update msg model =
+    let
+        updateLeftSideRatio operation =
+            let
+                newValue =
+                    case operation of
+                        Increment ->
+                            min (model.leftSideRatio + model.incrementAmount) 100
+
+                        Decrement ->
+                            max (model.leftSideRatio - model.incrementAmount) 0
+            in
+            ( { model | leftSideRatio = newValue }, sendToBackend (LeftSideRatioChanged newValue) )
+
+        updateRightSideRatio operation =
+            let
+                newValue =
+                    case operation of
+                        Increment ->
+                            min (model.rightSideRatio + model.incrementAmount) 100
+
+                        Decrement ->
+                            max (model.rightSideRatio - model.incrementAmount) 0
+            in
+            ( { model | rightSideRatio = newValue }, sendToBackend (RightSideRatioChanged newValue) )
+    in
     case msg of
         UrlChanged url ->
             ( { model | currentRoute = Route.fromUrl url }, Cmd.none )
 
         IncrementLeftSideRatio ->
-            let
-                newValue =
-                    min (model.leftSideRatio + model.incrementAmount) 100
-            in
-            ( { model | leftSideRatio = newValue }, sendToBackend (LeftSideRatioChanged newValue) )
+            updateLeftSideRatio Increment
 
         IncrementRightSideRatio ->
-            let
-                newValue =
-                    min (model.rightSideRatio + model.incrementAmount) 100
-            in
-            ( { model | rightSideRatio = newValue }, sendToBackend (RightSideRatioChanged newValue) )
+            updateRightSideRatio Increment
 
         LeftSideRatioChange stringValue ->
             case String.toInt stringValue of
@@ -143,6 +166,18 @@ update msg model =
             , sendToBackend (ResetRatiosButtonTapped newModel.leftSideRatio newModel.rightSideRatio)
             )
 
+        LeftArrowKeyTap ->
+            updateLeftSideRatio Increment
+
+        RightArrowKeyTap ->
+            updateRightSideRatio Increment
+
+        ShiftLeftArrowKeyTap ->
+            updateLeftSideRatio Decrement
+
+        ShiftRightArrowKeyTap ->
+            updateRightSideRatio Decrement
+
         FNoop ->
             ( model, Cmd.none )
 
@@ -180,6 +215,13 @@ updateFromBackend msg model =
               }
             , Cmd.none
             )
+
+
+subscriptions : Model -> Sub FrontendMsg
+subscriptions model =
+    Sub.batch
+        [ Browser.Events.onKeyDown keyDecoder
+        ]
 
 
 view : FrontendModel -> Element FrontendMsg
@@ -285,7 +327,11 @@ homeView model =
 
 adminView : Model -> Element FrontendMsg
 adminView model =
-    column [ width fill, spacing 20, paddingXY 20 20 ]
+    column
+        [ width fill
+        , spacing 20
+        , paddingXY 20 20
+        ]
         [ row [ spacing 20 ]
             [ row [ spacing 50 ]
                 [ Input.button
@@ -432,3 +478,28 @@ avatarView { sideData, side, scale } =
           <|
             text sideData.name
         ]
+
+
+keyDecoder : Decode.Decoder FrontendMsg
+keyDecoder =
+    Decode.map2 Tuple.pair
+        (Decode.field "key" Decode.string)
+        (Decode.field "shiftKey" Decode.bool)
+        |> Decode.andThen
+            (\( key, shiftKey ) ->
+                case ( key, shiftKey ) of
+                    ( "ArrowLeft", False ) ->
+                        Decode.succeed LeftArrowKeyTap
+
+                    ( "ArrowLeft", True ) ->
+                        Decode.succeed ShiftLeftArrowKeyTap
+
+                    ( "ArrowRight", False ) ->
+                        Decode.succeed RightArrowKeyTap
+
+                    ( "ArrowRight", True ) ->
+                        Decode.succeed ShiftRightArrowKeyTap
+
+                    _ ->
+                        Decode.fail "Not a key we care about"
+            )
