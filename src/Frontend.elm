@@ -119,13 +119,13 @@ update msg model =
         DecrementRightSideRatio ->
             updateRightSideRatio Decrement
 
-        RangeChange newrange ->
+        RangeChange newRange ->
             let
                 newModel =
                     { model
-                        | range = newrange
-                        , leftSideRatio = min model.leftSideRatio newrange
-                        , rightSideRatio = min model.rightSideRatio newrange
+                        | range = newRange
+                        , leftSideRatio = min model.leftSideRatio newRange
+                        , rightSideRatio = min model.rightSideRatio newRange
                     }
             in
             ( newModel
@@ -225,6 +225,19 @@ updateFromBackend msg model =
 
         ThemeNewValue theme clientId ->
             ( { model | theme = theme, clientId = clientId }, Cmd.none )
+
+        BackendNewValues backendModel clientId ->
+            ( { model
+                | leftSideRatio = backendModel.leftSideRatio
+                , rightSideRatio = backendModel.rightSideRatio
+                , range = backendModel.range
+                , avatarScale = backendModel.avatarScale
+                , fankadeliSide = backendModel.fankadeliSide
+                , theme = backendModel.theme
+                , clientId = clientId
+              }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub FrontendMsg

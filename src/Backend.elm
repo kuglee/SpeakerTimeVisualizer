@@ -35,12 +35,12 @@ update msg model =
     case msg of
         ClientConnected sessionId clientId ->
             ( model
-            , Cmd.batch
-                [ sendToFrontend clientId <| LeftSideRatioNewValue model.leftSideRatio clientId
-                , sendToFrontend clientId <| RightSideRatioNewValue model.rightSideRatio clientId
-                , sendToFrontend clientId <| AvatarScaleNewValue model.avatarScale clientId
-                , sendToFrontend clientId <| FankadeliSideNewValue model.fankadeliSide model.leftSideRatio model.rightSideRatio clientId
-                ]
+            , sendToFrontend
+                clientId
+              <|
+                BackendNewValues
+                    model
+                    clientId
             )
 
         Noop ->
@@ -56,16 +56,16 @@ updateFromFrontend sessionId clientId msg model =
         RightSideRatioChanged value ->
             ( { model | rightSideRatio = value }, broadcast (RightSideRatioNewValue value clientId) )
 
-        RangeChanged incrementAmount leftSideRatio rightSideRatio ->
+        RangeChanged range leftSideRatio rightSideRatio ->
             let
                 newModel =
                     { model
-                        | range = incrementAmount
+                        | range = range
                         , leftSideRatio = leftSideRatio
                         , rightSideRatio = rightSideRatio
                     }
             in
-            ( model
+            ( newModel
             , broadcast (RangeNewValue newModel.range newModel.leftSideRatio newModel.rightSideRatio clientId)
             )
 

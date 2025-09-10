@@ -71,6 +71,7 @@ type ToFrontend
     | FankadeliSideNewValue Side Int Int String
     | ResetRatiosNewValue Int Int String
     | ThemeNewValue Theme String
+    | BackendNewValues BackendModel String
 
 
 type alias SideData =
