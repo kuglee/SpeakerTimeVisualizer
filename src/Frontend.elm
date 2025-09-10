@@ -239,6 +239,9 @@ updateFromBackend msg model =
             , Cmd.none
             )
 
+        TFNoop ->
+            ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub FrontendMsg
 subscriptions model =

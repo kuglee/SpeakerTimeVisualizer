@@ -99,6 +99,9 @@ updateFromFrontend sessionId clientId msg model =
         ThemeChanged theme ->
             ( { model | theme = theme }, broadcast (ThemeNewValue theme clientId) )
 
+        TBNoop ->
+            ( model, Cmd.none )
+
 
 subscriptions model =
     Sub.batch

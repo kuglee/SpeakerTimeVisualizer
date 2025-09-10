@@ -1,10 +1,32 @@
-module Types exposing (..)
+module Evergreen.V6.Types exposing (..)
 
 import Browser.Navigation
-import Element exposing (Color)
-import Lamdera exposing (ClientId, SessionId)
-import Route exposing (Route)
-import Url exposing (Url)
+import Evergreen.V6.Route
+import Lamdera
+import Url
+
+
+type Side
+    = Left
+    | Right
+
+
+type Theme
+    = Light
+    | Dark
+
+
+type alias FrontendModel =
+    { key : Browser.Navigation.Key
+    , currentRoute : Maybe Evergreen.V6.Route.Route
+    , leftSideRatio : Int
+    , rightSideRatio : Int
+    , range : Int
+    , avatarScale : Int
+    , fankadeliSide : Side
+    , theme : Theme
+    , clientId : String
+    }
 
 
 type alias BackendModel =
@@ -17,21 +39,8 @@ type alias BackendModel =
     }
 
 
-type alias FrontendModel =
-    { key : Browser.Navigation.Key
-    , currentRoute : Maybe Route
-    , leftSideRatio : Int
-    , rightSideRatio : Int
-    , range : Int
-    , avatarScale : Int
-    , fankadeliSide : Side
-    , theme : Theme
-    , clientId : String
-    }
-
-
 type FrontendMsg
-    = UrlChanged Url
+    = UrlChanged Url.Url
     | IncrementLeftSideRatio
     | DecrementLeftSideRatio
     | IncrementRightSideRatio
@@ -60,7 +69,7 @@ type ToBackend
 
 
 type BackendMsg
-    = ClientConnected SessionId ClientId
+    = ClientConnected Lamdera.SessionId Lamdera.ClientId
     | Noop
 
 
@@ -74,20 +83,3 @@ type ToFrontend
     | ThemeNewValue Theme String
     | BackendNewValues BackendModel String
     | TFNoop
-
-
-type alias SideData =
-    { name : String
-    , imageSrc : String
-    , color : Color
-    }
-
-
-type Side
-    = Left
-    | Right
-
-
-type Theme
-    = Light
-    | Dark
