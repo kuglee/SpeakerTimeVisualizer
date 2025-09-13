@@ -29,7 +29,16 @@ app =
             \model ->
                 { title = "v1"
                 , body =
-                    [ Element.layout []
+                    [ Element.layoutWith
+                        { options =
+                            [ Element.focusStyle
+                                { borderColor = Nothing
+                                , backgroundColor = Nothing
+                                , shadow = Nothing
+                                }
+                            ]
+                        }
+                        []
                         (view model)
                     ]
                 }
