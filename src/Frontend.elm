@@ -304,27 +304,14 @@ homeView model =
         rightSideData =
             getSideData Right
 
-        backgroundColor =
-            case model.homeTheme of
-                Light ->
-                    rgb255 0xFF 0xFF 0xFF
-
-                Dark ->
-                    rgb255 0x00 0x00 0x00
-
-        textColor =
-            case model.homeTheme of
-                Light ->
-                    rgb255 0x00 0x00 0x00
-
-                Dark ->
-                    rgb255 0xFF 0xFF 0xFF
+        colors =
+            getColors model.homeTheme
     in
     column
         [ spacing 20
         , width fill
         , height fill
-        , Background.color backgroundColor
+        , Background.color colors.background
         , below
             (if model.isAdminVisibleOnHomePage then
                 adminView model
@@ -336,7 +323,7 @@ homeView model =
         [ Element.html
             (Html.node "style"
                 []
-                [ Html.text overscrollDisabledStyle
+                [ Html.text (backgroundColorStyle model.homeTheme)
                 ]
             )
         , row
@@ -352,14 +339,14 @@ homeView model =
                             leftSideData
                         , side = Left
                         , scale = model.avatarScale
-                        , labelColor = textColor
+                        , labelColor = colors.text
                         }
                     , avatarView
                         { sideData =
                             rightSideData
                         , side = Right
                         , scale = model.avatarScale
-                        , labelColor = textColor
+                        , labelColor = colors.text
                         }
                     ]
                 )
@@ -413,35 +400,28 @@ sideView { side, ratio, range, color } =
 adminView : Model -> Element FrontendMsg
 adminView model =
     let
-        backgroundColor =
-            case model.adminTheme of
-                Light ->
-                    rgb255 0xFF 0xFF 0xFF
-
-                Dark ->
-                    rgb255 0x00 0x00 0x00
-
-        textColor =
-            case model.adminTheme of
-                Light ->
-                    rgb255 0x00 0x00 0x00
-
-                Dark ->
-                    rgb255 0xFF 0xFF 0xFF
+        colors =
+            getColors model.adminTheme
     in
     column
         [ width fill
         , height fill
         , spacing 30
         , paddingXY 20 20
-        , Font.color textColor
-        , Background.color backgroundColor
+        , Font.color colors.text
+        , Background.color colors.background
         ]
         [ column
             [ width fill
             , spacing 50
             ]
-            [ row [ spacing 10 ]
+            [ Element.html
+                (Html.node "style"
+                    []
+                    [ Html.text (backgroundColorStyle model.adminTheme)
+                    ]
+                )
+            , row [ spacing 10 ]
                 [ el
                     [ width fill
                     ]
@@ -643,13 +623,36 @@ buttonStyle =
     ]
 
 
-overscrollDisabledStyle : String
-overscrollDisabledStyle =
-    """
-html {
-  overscroll-behavior: none;
-}
-"""
+backgroundColorStyle : Theme -> String
+backgroundColorStyle theme =
+    let
+        backgroundColor =
+            getColors theme |> .background |> toRgb
+
+        channelColorString value =
+            value * 255 |> String.fromFloat
+    in
+    "html { background-color: rgb(" ++ channelColorString backgroundColor.red ++ " " ++ channelColorString backgroundColor.green ++ " " ++ channelColorString backgroundColor.blue ++ ");}"
+
+
+getColors : Theme -> Colors
+getColors theme =
+    case theme of
+        Light ->
+            { background = rgb255 0xFF 0xFF 0xFF
+            , text = rgb255 0x00 0x00 0x00
+            }
+
+        Dark ->
+            { background = rgb255 0x00 0x00 0x00
+            , text = rgb255 0xFF 0xFF 0xFF
+            }
+
+
+type alias Colors =
+    { background : Color
+    , text : Color
+    }
 
 
 avatarView : { sideData : SideData, side : Side, scale : Int, labelColor : Color } -> Element msg
