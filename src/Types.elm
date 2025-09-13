@@ -28,6 +28,7 @@ type alias FrontendModel =
     , fankadeliSide : Side
     , homeTheme : Theme
     , adminTheme : Theme
+    , isAdminVisibleOnHomePage : Bool
     , clientId : String
     }
 
@@ -48,6 +49,7 @@ type FrontendMsg
     | ShiftRightArrowKeyTap
     | HomeThemeChange Theme
     | AdminThemeChange Theme
+    | ToggleAdminPanelOnHomePageButtonTap
     | FNoop
 
 
@@ -60,6 +62,7 @@ type ToBackend
     | ResetRatiosButtonTapped Int Int
     | HomeThemeChanged Theme
     | AdminThemeChanged Theme
+    | ToggleAdminPanelOnHomePageButtonTapped Bool
     | TBNoop
 
 
@@ -78,6 +81,7 @@ type ToFrontend
     | HomeThemeNewValue Theme String
     | AdminThemeNewValue Theme String
     | BackendNewValues BackendModel String
+    | IsAdminVisibleOnHomePageNewValue Bool
     | TFNoop
 
 

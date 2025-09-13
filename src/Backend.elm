@@ -106,6 +106,14 @@ updateFromFrontend sessionId clientId msg model =
         TBNoop ->
             ( model, Cmd.none )
 
+        ToggleAdminPanelOnHomePageButtonTapped value ->
+            ( model
+            , sendToFrontend
+                sessionId
+              <|
+                IsAdminVisibleOnHomePageNewValue value
+            )
+
 
 subscriptions model =
     Sub.batch

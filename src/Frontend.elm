@@ -66,6 +66,7 @@ init url key =
       , fankadeliSide = Left
       , homeTheme = Light
       , adminTheme = Light
+      , isAdminVisibleOnHomePage = False
       , clientId = ""
       }
     , Cmd.none
@@ -185,6 +186,13 @@ update msg model =
         AdminThemeChange theme ->
             ( { model | adminTheme = theme }, sendToBackend (AdminThemeChanged theme) )
 
+        ToggleAdminPanelOnHomePageButtonTap ->
+            let
+                newValue =
+                    not model.isAdminVisibleOnHomePage
+            in
+            ( { model | isAdminVisibleOnHomePage = newValue }, sendToBackend (ToggleAdminPanelOnHomePageButtonTapped newValue) )
+
 
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
@@ -250,6 +258,9 @@ updateFromBackend msg model =
         TFNoop ->
             ( model, Cmd.none )
 
+        IsAdminVisibleOnHomePageNewValue value ->
+            ( { model | isAdminVisibleOnHomePage = value }, Cmd.none )
+
 
 subscriptions : Model -> Sub FrontendMsg
 subscriptions model =
@@ -305,6 +316,13 @@ homeView model =
         , width fill
         , height fill
         , Background.color backgroundColor
+        , below
+            (if model.isAdminVisibleOnHomePage then
+                adminView model
+
+             else
+                Element.none
+            )
         ]
         [ Element.html
             (Html.node "style"
@@ -527,6 +545,27 @@ adminView model =
                 [ Input.option Light (text "Világos")
                 , Input.option Dark (text "Sötét")
                 ]
+            }
+        , Input.button
+            [ Background.color (rgb255 0x90 0x90 0x90)
+            , padding 10
+            ]
+            { onPress = Just ToggleAdminPanelOnHomePageButtonTap
+            , label =
+                el
+                    [ centerX
+                    , centerY
+                    ]
+                <|
+                    text
+                        ("Admin panel "
+                            ++ (if model.isAdminVisibleOnHomePage then
+                                    "ki"
+
+                                else
+                                    "be"
+                               )
+                        )
             }
         , column []
             [ el [ height (px 200) ] <| Element.none
