@@ -64,7 +64,8 @@ init url key =
       , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
-      , theme = Light
+      , homeTheme = Light
+      , adminTheme = Light
       , clientId = ""
       }
     , Cmd.none
@@ -178,8 +179,11 @@ update msg model =
         FNoop ->
             ( model, Cmd.none )
 
-        ThemeChange theme ->
-            ( { model | theme = theme }, sendToBackend (ThemeChanged theme) )
+        HomeThemeChange theme ->
+            ( { model | homeTheme = theme }, sendToBackend (HomeThemeChanged theme) )
+
+        AdminThemeChange theme ->
+            ( { model | adminTheme = theme }, sendToBackend (AdminThemeChanged theme) )
 
 
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
@@ -223,8 +227,11 @@ updateFromBackend msg model =
             , Cmd.none
             )
 
-        ThemeNewValue theme clientId ->
-            ( { model | theme = theme, clientId = clientId }, Cmd.none )
+        HomeThemeNewValue theme clientId ->
+            ( { model | homeTheme = theme, clientId = clientId }, Cmd.none )
+
+        AdminThemeNewValue theme clientId ->
+            ( { model | adminTheme = theme, clientId = clientId }, Cmd.none )
 
         BackendNewValues backendModel clientId ->
             ( { model
@@ -233,7 +240,8 @@ updateFromBackend msg model =
                 , range = backendModel.range
                 , avatarScale = backendModel.avatarScale
                 , fankadeliSide = backendModel.fankadeliSide
-                , theme = backendModel.theme
+                , homeTheme = backendModel.homeTheme
+                , adminTheme = backendModel.adminTheme
                 , clientId = clientId
               }
             , Cmd.none
@@ -277,7 +285,7 @@ homeView model =
             getSideData Right
 
         backgroundColor =
-            case model.theme of
+            case model.homeTheme of
                 Light ->
                     rgb255 0xFF 0xFF 0xFF
 
@@ -285,7 +293,7 @@ homeView model =
                     rgb255 0x00 0x00 0x00
 
         textColor =
-            case model.theme of
+            case model.homeTheme of
                 Light ->
                     rgb255 0x00 0x00 0x00
 
@@ -377,10 +385,30 @@ sideView { side, ratio, range, color } =
 
 adminView : Model -> Element FrontendMsg
 adminView model =
+    let
+        backgroundColor =
+            case model.adminTheme of
+                Light ->
+                    rgb255 0xFF 0xFF 0xFF
+
+                Dark ->
+                    rgb255 0x00 0x00 0x00
+
+        textColor =
+            case model.adminTheme of
+                Light ->
+                    rgb255 0x00 0x00 0x00
+
+                Dark ->
+                    rgb255 0xFF 0xFF 0xFF
+    in
     column
         [ width fill
+        , height fill
         , spacing 30
         , paddingXY 20 20
+        , Font.color textColor
+        , Background.color backgroundColor
         ]
         [ column
             [ width fill
@@ -480,9 +508,21 @@ adminView model =
             [ padding 10
             , spacing 20
             ]
-            { onChange = ThemeChange
-            , selected = Just model.theme
+            { onChange = HomeThemeChange
+            , selected = Just model.homeTheme
             , label = Input.labelAbove [] (text "Téma")
+            , options =
+                [ Input.option Light (text "Világos")
+                , Input.option Dark (text "Sötét")
+                ]
+            }
+        , Input.radio
+            [ padding 10
+            , spacing 20
+            ]
+            { onChange = AdminThemeChange
+            , selected = Just model.adminTheme
+            , label = Input.labelAbove [] (text "Admin téma")
             , options =
                 [ Input.option Light (text "Világos")
                 , Input.option Dark (text "Sötét")

@@ -13,7 +13,8 @@ type alias BackendModel =
     , range : Int
     , avatarScale : Int
     , fankadeliSide : Side
-    , theme : Theme
+    , homeTheme : Theme
+    , adminTheme : Theme
     }
 
 
@@ -25,7 +26,8 @@ type alias FrontendModel =
     , range : Int
     , avatarScale : Int
     , fankadeliSide : Side
-    , theme : Theme
+    , homeTheme : Theme
+    , adminTheme : Theme
     , clientId : String
     }
 
@@ -44,7 +46,8 @@ type FrontendMsg
     | RightArrowKeyTap
     | ShiftLeftArrowKeyTap
     | ShiftRightArrowKeyTap
-    | ThemeChange Theme
+    | HomeThemeChange Theme
+    | AdminThemeChange Theme
     | FNoop
 
 
@@ -55,7 +58,8 @@ type ToBackend
     | AvatarScaleChanged Int
     | FankaDeliSideChanged Side
     | ResetRatiosButtonTapped Int Int
-    | ThemeChanged Theme
+    | HomeThemeChanged Theme
+    | AdminThemeChanged Theme
     | TBNoop
 
 
@@ -71,7 +75,8 @@ type ToFrontend
     | AvatarScaleNewValue Int String
     | FankadeliSideNewValue Side Int Int String
     | ResetRatiosNewValue Int Int String
-    | ThemeNewValue Theme String
+    | HomeThemeNewValue Theme String
+    | AdminThemeNewValue Theme String
     | BackendNewValues BackendModel String
     | TFNoop
 

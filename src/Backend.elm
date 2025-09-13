@@ -24,7 +24,8 @@ init =
       , range = 100
       , avatarScale = 15
       , fankadeliSide = Left
-      , theme = Light
+      , homeTheme = Light
+      , adminTheme = Light
       }
     , Cmd.none
     )
@@ -96,8 +97,11 @@ updateFromFrontend sessionId clientId msg model =
             , broadcast (ResetRatiosNewValue newModel.leftSideRatio newModel.rightSideRatio clientId)
             )
 
-        ThemeChanged theme ->
-            ( { model | theme = theme }, broadcast (ThemeNewValue theme clientId) )
+        HomeThemeChanged theme ->
+            ( { model | homeTheme = theme }, broadcast (HomeThemeNewValue theme clientId) )
+
+        AdminThemeChanged theme ->
+            ( { model | adminTheme = theme }, broadcast (AdminThemeNewValue theme clientId) )
 
         TBNoop ->
             ( model, Cmd.none )
