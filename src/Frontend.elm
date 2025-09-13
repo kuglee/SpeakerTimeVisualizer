@@ -598,7 +598,7 @@ buttonStyle =
 overscrollDisabledStyle : String
 overscrollDisabledStyle =
     """
-body {
+html {
   overscroll-behavior: none;
 }
 """
