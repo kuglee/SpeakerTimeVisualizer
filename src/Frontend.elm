@@ -206,51 +206,52 @@ update msg model =
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
-        LeftSideRatioNewValue newValue clientId ->
-            ( { model | leftSideRatio = newValue, clientId = clientId }, Cmd.none )
+        LeftSideRatioNewValue newValue ->
+            ( { model | leftSideRatio = newValue }, Cmd.none )
 
-        RightSideRatioNewValue newValue clientId ->
-            ( { model | rightSideRatio = newValue, clientId = clientId }, Cmd.none )
+        RightSideRatioNewValue newValue ->
+            ( { model | rightSideRatio = newValue }, Cmd.none )
 
-        RangeNewValue range leftSideRatio rightSideRatio clientId ->
+        RangeNewValue range leftSideRatio rightSideRatio ->
             ( { model
                 | range = range
                 , leftSideRatio = leftSideRatio
                 , rightSideRatio = rightSideRatio
-                , clientId = clientId
               }
             , Cmd.none
             )
 
-        AvatarScaleNewValue newValue clientId ->
-            ( { model | avatarScale = newValue, clientId = clientId }, Cmd.none )
+        AvatarScaleNewValue newValue ->
+            ( { model
+                | avatarScale = newValue
+              }
+            , Cmd.none
+            )
 
-        FankadeliSideNewValue newSideValue leftSideRatio rightSideRatio clientId ->
+        FankadeliSideNewValue newSideValue leftSideRatio rightSideRatio ->
             ( { model
                 | fankadeliSide = newSideValue
                 , leftSideRatio = leftSideRatio
                 , rightSideRatio = rightSideRatio
-                , clientId = clientId
               }
             , Cmd.none
             )
 
-        ResetRatiosNewValue leftSideRatio rightSideRatio clientId ->
+        ResetRatiosNewValue leftSideRatio rightSideRatio ->
             ( { model
                 | leftSideRatio = leftSideRatio
                 , rightSideRatio = rightSideRatio
-                , clientId = clientId
               }
             , Cmd.none
             )
 
-        HomeThemeNewValue theme clientId ->
-            ( { model | homeTheme = theme, clientId = clientId }, Cmd.none )
+        HomeThemeNewValue theme ->
+            ( { model | homeTheme = theme }, Cmd.none )
 
-        AdminThemeNewValue theme clientId ->
-            ( { model | adminTheme = theme, clientId = clientId }, Cmd.none )
+        AdminThemeNewValue theme ->
+            ( { model | adminTheme = theme }, Cmd.none )
 
-        BackendNewValues backendModel clientId ->
+        BackendNewValues backendModel ->
             ( { model
                 | leftSideRatio = backendModel.leftSideRatio
                 , rightSideRatio = backendModel.rightSideRatio
@@ -259,7 +260,6 @@ updateFromBackend msg model =
                 , fankadeliSide = backendModel.fankadeliSide
                 , homeTheme = backendModel.homeTheme
                 , adminTheme = backendModel.adminTheme
-                , clientId = clientId
               }
             , Cmd.none
             )

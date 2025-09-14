@@ -72,15 +72,15 @@ type BackendMsg
 
 
 type ToFrontend
-    = LeftSideRatioNewValue Int String
-    | RightSideRatioNewValue Int String
-    | RangeNewValue Int Int Int String
-    | AvatarScaleNewValue Int String
-    | FankadeliSideNewValue Side Int Int String
-    | ResetRatiosNewValue Int Int String
-    | HomeThemeNewValue Theme String
-    | AdminThemeNewValue Theme String
-    | BackendNewValues BackendModel String
+    = LeftSideRatioNewValue Int
+    | RightSideRatioNewValue Int
+    | RangeNewValue Int Int Int
+    | AvatarScaleNewValue Int
+    | FankadeliSideNewValue Side Int Int
+    | ResetRatiosNewValue Int Int
+    | HomeThemeNewValue Theme
+    | AdminThemeNewValue Theme
+    | BackendNewValues BackendModel
     | IsAdminVisibleOnHomePageNewValue Bool
     | TFNoop
 

@@ -41,7 +41,6 @@ update msg model =
               <|
                 BackendNewValues
                     model
-                    clientId
             )
 
         Noop ->
@@ -52,10 +51,10 @@ updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd
 updateFromFrontend sessionId clientId msg model =
     case msg of
         LeftSideRatioChanged value ->
-            ( { model | leftSideRatio = value }, broadcast (LeftSideRatioNewValue value clientId) )
+            ( { model | leftSideRatio = value }, broadcast (LeftSideRatioNewValue value) )
 
         RightSideRatioChanged value ->
-            ( { model | rightSideRatio = value }, broadcast (RightSideRatioNewValue value clientId) )
+            ( { model | rightSideRatio = value }, broadcast (RightSideRatioNewValue value) )
 
         RangeChanged range leftSideRatio rightSideRatio ->
             let
@@ -67,11 +66,11 @@ updateFromFrontend sessionId clientId msg model =
                     }
             in
             ( newModel
-            , broadcast (RangeNewValue newModel.range newModel.leftSideRatio newModel.rightSideRatio clientId)
+            , broadcast (RangeNewValue newModel.range newModel.leftSideRatio newModel.rightSideRatio)
             )
 
         AvatarScaleChanged value ->
-            ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
+            ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value) )
 
         FankaDeliSideChanged fankadeliSide ->
             let
@@ -83,7 +82,7 @@ updateFromFrontend sessionId clientId msg model =
                     }
             in
             ( newModel
-            , broadcast (FankadeliSideNewValue newModel.fankadeliSide newModel.leftSideRatio newModel.rightSideRatio clientId)
+            , broadcast (FankadeliSideNewValue newModel.fankadeliSide newModel.leftSideRatio newModel.rightSideRatio)
             )
 
         ResetRatiosButtonTapped leftSideRatio rightSideRatio ->
@@ -95,14 +94,14 @@ updateFromFrontend sessionId clientId msg model =
                     }
             in
             ( newModel
-            , broadcast (ResetRatiosNewValue newModel.leftSideRatio newModel.rightSideRatio clientId)
+            , broadcast (ResetRatiosNewValue newModel.leftSideRatio newModel.rightSideRatio)
             )
 
         HomeThemeChanged theme ->
-            ( { model | homeTheme = theme }, broadcast (HomeThemeNewValue theme clientId) )
+            ( { model | homeTheme = theme }, broadcast (HomeThemeNewValue theme) )
 
         AdminThemeChanged theme ->
-            ( { model | adminTheme = theme }, broadcast (AdminThemeNewValue theme clientId) )
+            ( { model | adminTheme = theme }, broadcast (AdminThemeNewValue theme) )
 
         TBNoop ->
             ( model, Cmd.none )
