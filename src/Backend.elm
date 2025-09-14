@@ -73,16 +73,17 @@ updateFromFrontend sessionId clientId msg model =
         AvatarScaleChanged value ->
             ( { model | avatarScale = value }, broadcast (AvatarScaleNewValue value clientId) )
 
-        FankaDeliSideChanged side ->
+        FankaDeliSideChanged fankadeliSide ->
             let
                 newModel =
                     { model
-                        | leftSideRatio = model.rightSideRatio
+                        | fankadeliSide = fankadeliSide
+                        , leftSideRatio = model.rightSideRatio
                         , rightSideRatio = model.leftSideRatio
                     }
             in
             ( newModel
-            , broadcast (FankadeliSideNewValue side newModel.leftSideRatio newModel.rightSideRatio clientId)
+            , broadcast (FankadeliSideNewValue newModel.fankadeliSide newModel.leftSideRatio newModel.rightSideRatio clientId)
             )
 
         ResetRatiosButtonTapped leftSideRatio rightSideRatio ->
